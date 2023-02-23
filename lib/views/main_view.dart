@@ -1,98 +1,82 @@
-import 'dart:io';
+/*
+  This is gonna be the Main View of the App.
+*/
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 
-class PresetsWidget extends StatelessWidget {
-  final List<String> presets;
+import '../widgets/columns.dart';
 
-  const PresetsWidget(this.presets, {super.key});
-
-  Widget _makeWidgetFromStringList(List<String> data) {
-    List<Widget> children = [];
-    for (String name in data) {
-      children.add(
-        Expanded(
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(10, 10, 10, 10),
-            child: TextButton(
-                  style: const ButtonStyle(
-                    backgroundColor: MaterialStatePropertyAll(Colors.white),
-                    minimumSize: MaterialStatePropertyAll(Size(10000000, 0)),
-                  ),
-                  onPressed: () {
-                    /*
-                      TODO: If name is [Done], than open up the preset creator view, if not than play the preset with the given name.
-                    */
-                  },
-                  child: Text(name),
-                ),
-          ),
+class _MainViewAppBar extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final screenData = MediaQuery.of(context);
+    return SliverAppBar(
+      expandedHeight: screenData.size.height * 4 / 10,
+      collapsedHeight: screenData.size.height * 1 / 10,
+      flexibleSpace: const FlexibleSpaceBar(
+        background: Center(
+          child: Text('Placeholder'),
         ),
-      );
-    }
-    return Expanded(
-      child: Column(
-        children: children,
       ),
     );
   }
+  /*
+    TODO
+  */
+}
 
+List<String> _getAllAvailablePresets() {
+  return ['[NONE]', '[NONE]', '[NONE]', '[NONE]', '[NONE]', '[NONE]'];
+}
+
+class _MainViewKillButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Row(
-          children: [
-            _makeWidgetFromStringList(
-              presets.sublist(0, presets.length ~/ 2),
-            ),
-            _makeWidgetFromStringList(
-              presets.sublist(presets.length ~/ 2),
-            ),
-          ],
+    return SliverToBoxAdapter(
+      child: SizedBox(
+        height: MediaQuery.of(context).size.height / 5,
+        child: TextButton(
+          style: TextButton.styleFrom(
+            backgroundColor: Colors.red,
+          ),
+          child: const Text('Kill button'),
+          onPressed: () {},
         ),
-      ],
+      ),
     );
   }
 }
 
-class _MainViewState extends State<MainView> {
+class _MainViewPresets extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final halfHeight = MediaQuery.of(context).size.height / 2;
+    List<String> presets = _getAllAvailablePresets();
+    List<Widget> widgetList = [];
+    for (String value in presets) {
+      widgetList.add(
+        TextButton(onPressed: () {}, child: Text(value)),
+      );
+    }
+    return Expanded(
+      child: Columns(2, widgetList),
+    );
+  }
+}
+
+/*
+class _MainViewEntities extends StatelessWidget {
+  // TODO
+}
+*/
+
+class _MainViewState extends State<StatefulWidget> {
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       body: CustomScrollView(
         slivers: <Widget>[
-          SliverAppBar(
-            expandedHeight: halfHeight,
-            flexibleSpace: FlexibleSpaceBar(
-              background: Image.file(File('assets/logo.png')),
-            ),
-          ),
-          SliverToBoxAdapter(
-            child: Expanded(
-              child: Container(
-                height: halfHeight,
-                color: Colors.red,
-                child: const Expanded(
-                  child: PresetsWidget([
-                    'Full RGB Wave',
-                    '[NONE]',
-                    '[NONE]',
-                    '[NONE]',
-                    '[NONE]',
-                    '[NONE]',
-                  ]),
-                ),
-              ),
-            ),
-          ),
-          SliverToBoxAdapter(
-            child: Container(
-              height: halfHeight,
-              color: Colors.green,
-            ),
-          )
+          _MainViewAppBar(),
+          _MainViewKillButton(),
+          _MainViewPresets()
         ],
       ),
     );
