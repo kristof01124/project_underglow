@@ -97,7 +97,7 @@ class FillEffectCreator extends AnimationCreator {
     return FillEffectMessageBuilder(
       FillEffectMessage(
         (duration as int),
-        RGB.fromColor(color as Color),
+        (color as Color),
       ),
     );
   }

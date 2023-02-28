@@ -2,28 +2,17 @@ import 'package:flutter/services.dart';
 
 import 'message.dart';
 
-class RGB {
-  final int r, g, b;
-
-  const RGB([this.r = 0, this.g = 0, this.b = 0]);
-
-  RGB.fromColor(Color value)
-      : r = value.red,
-        g = value.green,
-        b = value.blue;
-}
-
 class RgbMessageData extends SegmentMessage {
-  RgbMessageData(RGB rgb) {
-    add('r', MessageUint8(rgb.r));
-    add('g', MessageUint8(rgb.g));
-    add('b', MessageUint8(rgb.b));
+  RgbMessageData(Color color) {
+    add('r', MessageUint8(color.red));
+    add('g', MessageUint8(color.green));
+    add('b', MessageUint8(color.blue));
   }
 
   int get r => (segments['r'] as MessageUint8).value;
   int get g => (segments['g'] as MessageUint8).value;
   int get b => (segments['b'] as MessageUint8).value;
-  RGB get color => RGB(r, g, b);
+  Color get color => Color.fromARGB(255, r, g, b);
 }
 
 class AnimationSwitchMessage extends Message {
@@ -198,39 +187,44 @@ enum EffectType {
 }
 
 class FillEffectMessage extends SegmentMessage {
-  FillEffectMessage([int duration = 0, RGB color = const RGB(0, 0, 0)]) {
+  FillEffectMessage(
+      [int duration = 0, Color color = const Color.fromARGB(255, 0, 0, 0)]) {
     add('duration', MessageUint32(duration));
     add('color', RgbMessageData(color));
   }
 
   int get duration => (segments['duration'] as MessageUint32).value;
-  RGB get color => (segments['color'] as RgbMessageData).color;
+  Color get color => (segments['color'] as RgbMessageData).color;
 }
 
 class RunningEffectMessage extends FillEffectMessage {
-  RunningEffectMessage([int duration = 0, RGB color = const RGB(0, 0, 0)])
+  RunningEffectMessage(
+      [int duration = 0, Color color = const Color.fromARGB(255, 0, 0, 0)])
       : super(duration, color);
 }
 
 class FillupEffectMessage extends FillEffectMessage {
-  FillupEffectMessage([int duration = 0, RGB color = const RGB(0, 0, 0)])
+  FillupEffectMessage(
+      [int duration = 0, Color color = const Color.fromARGB(255, 0, 0, 0)])
       : super(duration, color);
 }
 
 class HarmonikaEffectMessage extends FillEffectMessage {
-  HarmonikaEffectMessage([int duration = 0, RGB color = const RGB(0, 0, 0)])
+  HarmonikaEffectMessage(
+      [int duration = 0, Color color = const Color.fromARGB(255, 0, 0, 0)])
       : super(duration, color);
 }
 
 class FilloutEffectMessage extends FillEffectMessage {
-  FilloutEffectMessage([int duration = 0, RGB color = const RGB(0, 0, 0)])
+  FilloutEffectMessage(
+      [int duration = 0, Color color = const Color.fromARGB(255, 0, 0, 0)])
       : super(duration, color);
 }
 
 class PewPewEffectMessage extends SegmentMessage {
   PewPewEffectMessage(
       [int duration = 0,
-      RGB color = const RGB(0, 0, 0),
+      Color color = const Color.fromARGB(255, 0, 0, 0),
       double length = 0,
       double gap = 0,
       int n = 0]) {
@@ -242,7 +236,7 @@ class PewPewEffectMessage extends SegmentMessage {
   }
 
   int get duration => (segments['duration'] as MessageUint32).value;
-  RGB get color => (segments['color'] as RgbMessageData).color;
+  Color get color => (segments['color'] as RgbMessageData).color;
   double get length => (segments['length'] as MessageFloat32).value;
   double get gap => (segments['gap'] as MessageFloat32).value;
   int get n => (segments['n'] as MessageUint32).value;
@@ -269,8 +263,8 @@ class RgbCycleEffectMessage extends SegmentMessage {
 class TwoColorWaveEffectMessage extends SegmentMessage {
   TwoColorWaveEffectMessage(
       [int duration = 0,
-      RGB color1 = const RGB(0, 0, 0),
-      RGB color2 = const RGB(0, 0, 0),
+      Color color1 = const Color.fromARGB(255, 0, 0, 0),
+      Color color2 = const Color.fromARGB(255, 0, 0, 0),
       double a = 0,
       double b = 0,
       double c = 0,
@@ -285,8 +279,8 @@ class TwoColorWaveEffectMessage extends SegmentMessage {
   }
 
   int get duration => (segments['duration'] as MessageUint32).value;
-  RGB get color1 => (segments['color1'] as RgbMessageData).color;
-  RGB get color2 => (segments['color2'] as RgbMessageData).color;
+  Color get color1 => (segments['color1'] as RgbMessageData).color;
+  Color get color2 => (segments['color2'] as RgbMessageData).color;
   double get a => (segments['a'] as MessageFloat32).value;
   double get b => (segments['b'] as MessageFloat32).value;
   double get c => (segments['c'] as MessageFloat32).value;
@@ -295,20 +289,22 @@ class TwoColorWaveEffectMessage extends SegmentMessage {
 
 class ParticleFillupEffectMessage extends FillEffectMessage {
   ParticleFillupEffectMessage(
-      [int duration = 0, RGB color = const RGB(0, 0, 0)])
+      [int duration = 0, Color color = const Color.fromARGB(255, 0, 0, 0)])
       : super(duration, color);
 }
 
 class BreatheEffectMessage extends SegmentMessage {
   BreatheEffectMessage(
-      [int duration = 0, RGB color = const RGB(0, 0, 0), int fadeTime = 0]) {
+      [int duration = 0,
+      Color color = const Color.fromARGB(255, 0, 0, 0),
+      int fadeTime = 0]) {
     add('duration', MessageUint32(duration));
     add('color', RgbMessageData(color));
     add('fadeTime', MessageUint32(fadeTime));
   }
 
   int get duration => (segments['duration'] as MessageUint32).value;
-  RGB get color => (segments['color'] as RgbMessageData).color;
+  Color get color => (segments['color'] as RgbMessageData).color;
   int get fadeTime => (segments['fadeTime'] as MessageUint32).value;
 }
 
@@ -323,7 +319,7 @@ class BasicFillState extends SegmentMessage {
   BasicFillState([
     double start = 0,
     double length = 0,
-    RGB color = const RGB(0, 0, 0),
+    Color color = const Color.fromARGB(255, 0, 0, 0),
   ]) {
     add('start', MessageFloat32(start));
     add('length', MessageFloat32(length));
@@ -332,7 +328,7 @@ class BasicFillState extends SegmentMessage {
 
   double get start => (segments['start'] as MessageFloat32).value;
   double get length => (segments['length'] as MessageFloat32).value;
-  RGB get color => (segments['color'] as RgbMessageData).color;
+  Color get color => (segments['color'] as RgbMessageData).color;
 }
 
 class BasicRgbWaveState extends SegmentMessage {
@@ -358,8 +354,8 @@ class BasicTransitionState extends SegmentMessage {
       double length = 0,
       int n = 0,
       double gap = 0,
-      RGB color1 = const RGB(0, 0, 0),
-      RGB color2 = const RGB(0, 0, 0)]) {
+      Color color1 = const Color.fromARGB(255, 0, 0, 0),
+      Color color2 = const Color.fromARGB(255, 0, 0, 0)]) {
     add('start', MessageFloat32(start));
     add('length', MessageFloat32(length));
     add('n', MessageUint8(n));
@@ -372,15 +368,15 @@ class BasicTransitionState extends SegmentMessage {
   double get length => (segments['length'] as MessageFloat32).value;
   int get n => (segments['n'] as MessageUint8).value;
   double get gap => (segments['gap'] as MessageFloat32).value;
-  RGB get color1 => (segments['color1'] as RgbMessageData).color;
-  RGB get color2 => (segments['color2'] as RgbMessageData).color;
+  Color get color1 => (segments['color1'] as RgbMessageData).color;
+  Color get color2 => (segments['color2'] as RgbMessageData).color;
 }
 
 class BasicParticleFillupState extends BasicFillState {
   BasicParticleFillupState([
     double start = 0,
     double length = 0,
-    RGB color = const RGB(0, 0, 0),
+    Color color = const Color.fromARGB(255, 0, 0, 0),
   ]) : super(start, length, color);
 }
 
