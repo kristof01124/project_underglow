@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 
 class Columns extends StatelessWidget {
@@ -8,8 +10,7 @@ class Columns extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final columnLength =
-        children.length + (numberOfColumns - 1) ~/ numberOfColumns;
+    final columnLength = (children.length + numberOfColumns - 1) ~/ numberOfColumns;
     List<Widget> outputChildren = [];
     for (int i = 0; i < numberOfColumns; i++) {
       int end = (i + 1) * columnLength;
@@ -19,16 +20,16 @@ class Columns extends StatelessWidget {
       outputChildren.add(
         Expanded(
           child: Column(
-            children:
-                children.sublist(i * columnLength, ),
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: children.sublist(i * columnLength, end),
           ),
         ),
       );
     }
-    return Expanded(
-      child: Row(
-        children: outputChildren,
-      ),
+    Widget output = Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: outputChildren,
     );
+    return output;
   }
 }

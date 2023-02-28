@@ -1,9 +1,16 @@
+import 'package:flutter/services.dart';
+
 import 'message.dart';
 
 class RGB {
   final int r, g, b;
 
   const RGB([this.r = 0, this.g = 0, this.b = 0]);
+
+  RGB.fromColor(Color value)
+      : r = value.red,
+        g = value.green,
+        b = value.blue;
 }
 
 class RgbMessageData extends SegmentMessage {
@@ -109,10 +116,22 @@ enum AnimationObjectType {
 class DynamicAnimationMessageBody extends SegmentMessage {
   DynamicAnimationMessageBody(
       [double delta = 0, double min = 0, double max = 0, int index = 0]) {
-    add('delta', MessageFloat32(delta));
-    add('min', MessageFloat32(min));
-    add('max', MessageFloat32(max));
-    add('index', MessageUint16(index));
+    add(
+      'delta',
+      MessageFloat32(delta),
+    );
+    add(
+      'min',
+      MessageFloat32(min),
+    );
+    add(
+      'max',
+      MessageFloat32(max),
+    );
+    add(
+      'index',
+      MessageUint16(index),
+    );
   }
 
   double get delta => (segments['delta'] as MessageFloat32).value;
@@ -129,9 +148,9 @@ class DynamicAnimationMessage
       : super(body, animation);
 }
 
-class AnimationLoopMessage
-    extends PairMessage<MessageUint16, Message> {
-  AnimationLoopMessage.empty() : super(MessageUint16(0), AnimationBuilderMessage());
+class AnimationLoopMessage extends PairMessage<MessageUint16, Message> {
+  AnimationLoopMessage.empty()
+      : super(MessageUint16(0), AnimationBuilderMessage());
   AnimationLoopMessage(MessageUint16 body, Message animation)
       : super(body, animation);
 }
@@ -275,7 +294,8 @@ class TwoColorWaveEffectMessage extends SegmentMessage {
 }
 
 class ParticleFillupEffectMessage extends FillEffectMessage {
-  ParticleFillupEffectMessage([int duration = 0, RGB color = const RGB(0, 0, 0)])
+  ParticleFillupEffectMessage(
+      [int duration = 0, RGB color = const RGB(0, 0, 0)])
       : super(duration, color);
 }
 
@@ -545,6 +565,7 @@ class FillEffectMessageBuilder extends SegmentMessage {
     add('animation', animation);
   }
 }
+
 class RunningEffectMessageBuilder extends SegmentMessage {
   RunningEffectMessageBuilder(RunningEffectMessage animation) {
     add(
@@ -554,8 +575,9 @@ class RunningEffectMessageBuilder extends SegmentMessage {
           MessageUint16(EffectType.running.index)
         ]));
     add('animation', animation);
-    }
+  }
 }
+
 class FillupEffectMessageBuilder extends SegmentMessage {
   FillupEffectMessageBuilder(FillupEffectMessage animation) {
     add(
@@ -565,10 +587,11 @@ class FillupEffectMessageBuilder extends SegmentMessage {
           MessageUint16(EffectType.fillup.index)
         ]));
     add('animation', animation);
-    }
+  }
 }
+
 class FilloutEffectMessageBuilder extends SegmentMessage {
-FilloutEffectMessageBuilder(FilloutEffectMessage animation) {
+  FilloutEffectMessageBuilder(FilloutEffectMessage animation) {
     add(
         'index',
         MessageArray([
@@ -576,10 +599,11 @@ FilloutEffectMessageBuilder(FilloutEffectMessage animation) {
           MessageUint16(EffectType.fillout.index)
         ]));
     add('animation', animation);
-    }
+  }
 }
+
 class HarmonikaEffectMessageBuilder extends SegmentMessage {
-HarmonikaEffectMessageBuilder(HarmonikaEffectMessage animation) {
+  HarmonikaEffectMessageBuilder(HarmonikaEffectMessage animation) {
     add(
         'index',
         MessageArray([
@@ -587,10 +611,11 @@ HarmonikaEffectMessageBuilder(HarmonikaEffectMessage animation) {
           MessageUint16(EffectType.harmonika.index)
         ]));
     add('animation', animation);
-    }
+  }
 }
+
 class PewPewEffectMessageBuilder extends SegmentMessage {
-PewPewEffectMessageBuilder(PewPewEffectMessage animation) {
+  PewPewEffectMessageBuilder(PewPewEffectMessage animation) {
     add(
         'index',
         MessageArray([
@@ -598,60 +623,80 @@ PewPewEffectMessageBuilder(PewPewEffectMessage animation) {
           MessageUint16(EffectType.pewPew.index)
         ]));
     add('animation', animation);
-    }
+  }
 }
+
 class RgbWaveEffectMessageBuilder extends SegmentMessage {
-RgbWaveEffectMessageBuilder(RgbWaveEffectMessage animation) {
+  RgbWaveEffectMessageBuilder(RgbWaveEffectMessage animation) {
     add(
-        'index',
-        MessageArray([
+      'index',
+      MessageArray(
+        [
           MessageUint16(AnimationType.effect.index),
-          MessageUint16(EffectType.rgbWave.index)
-        ]));
+          MessageUint16(EffectType.rgbWave.index),
+        ],
+      ),
+    );
     add('animation', animation);
-    }
+  }
 }
+
 class RgbCycleEffectMessageBuilder extends SegmentMessage {
-RgbCycleEffectMessageBuilder(RgbCycleEffectMessage animation) {
+  RgbCycleEffectMessageBuilder(RgbCycleEffectMessage animation) {
     add(
-        'index',
-        MessageArray([
+      'index',
+      MessageArray(
+        [
           MessageUint16(AnimationType.effect.index),
-          MessageUint16(EffectType.rgbCycle.index)
-        ]));
+          MessageUint16(EffectType.rgbCycle.index),
+        ],
+      ),
+    );
     add('animation', animation);
-    }
+  }
 }
+
 class TwoColorWaveEffectMessageBuilder extends SegmentMessage {
-TwoColorWaveEffectMessageBuilder(TwoColorWaveEffectMessage animation) {
+  TwoColorWaveEffectMessageBuilder(TwoColorWaveEffectMessage animation) {
     add(
-        'index',
-        MessageArray([
+      'index',
+      MessageArray(
+        [
           MessageUint16(AnimationType.effect.index),
-          MessageUint16(EffectType.twoColorWave.index)
-        ]));
+          MessageUint16(EffectType.twoColorWave.index),
+        ],
+      ),
+    );
     add('animation', animation);
-    }
+  }
 }
+
 class ParticleFillupEffectMessageBuilder extends SegmentMessage {
-ParticleFillupEffectMessageBuilder(ParticleFillupEffectMessage animation) {
+  ParticleFillupEffectMessageBuilder(ParticleFillupEffectMessage animation) {
     add(
-        'index',
-        MessageArray([
+      'index',
+      MessageArray(
+        [
           MessageUint16(AnimationType.effect.index),
-          MessageUint16(EffectType.particleFillup.index)
-        ]));
+          MessageUint16(EffectType.particleFillup.index),
+        ],
+      ),
+    );
     add('animation', animation);
-    }
+  }
 }
+
 class BreatheEffectMessageBuilder extends SegmentMessage {
-BreatheEffectMessageBuilder(BreatheEffectMessage animation) {
+  BreatheEffectMessageBuilder(BreatheEffectMessage animation) {
     add(
-        'index',
-        MessageArray([
+      'index',
+      MessageArray(
+        [
           MessageUint16(AnimationType.effect.index),
-          MessageUint16(EffectType.breathe.index)
-        ]));
+          MessageUint16(EffectType.breathe.index),
+        ],
+      ),
+    );
     add('animation', animation);
-    }
+  }
 }

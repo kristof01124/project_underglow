@@ -3,7 +3,48 @@
 */
 import 'package:flutter/material.dart';
 
+import '../constants.dart';
 import '../widgets/columns.dart';
+
+void _openDetailedLedView(LedEntity entity) {
+  /*
+    TODO: Should open up the detailed led View tied to the specific entity.
+    Requirement: Implementation of detailed led view.
+  */
+}
+
+List<LedEntity> _getAllAvailableEntities() {
+  List<LedEntity> out = [
+    LedEntity("Underglow", "Rgb wave", true, 200),
+    LedEntity("Left index", "Rgb wave", true, 200),
+    LedEntity("Right index", "Rgb wave", false, 200),
+    LedEntity("Grill", "Rgb wave", true, 200),
+    LedEntity("Foot light", "Rgb wave", false, 200),
+  ];
+  return out;
+}
+
+String _getPresetTitelForIndex(index) {
+  return '[NONE]';
+}
+
+void _togglePowerState(LedEntity entity) {}
+
+LedEntity _getLedEntityByName(String name) {
+  return LedEntity(name, 'Rgb wave', true, 200);
+}
+
+void _playPreset(int index) {}
+
+void _openPresetSetterView(int index) {}
+
+final ledEntityButtonOnStyle = TextButton.styleFrom(
+  backgroundColor: Colors.green,
+);
+
+final ledEntityButtonOffStyle = TextButton.styleFrom(
+  backgroundColor: Colors.red,
+);
 
 class _MainViewAppBar extends StatelessWidget {
   @override
@@ -20,12 +61,8 @@ class _MainViewAppBar extends StatelessWidget {
     );
   }
   /*
-    TODO
+    TODO: Stylization of the taskbar
   */
-}
-
-List<String> _getAllAvailablePresets() {
-  return ['[NONE]', '[NONE]', '[NONE]', '[NONE]', '[NONE]', '[NONE]'];
 }
 
 class _MainViewKillButton extends StatelessWidget {
@@ -46,29 +83,138 @@ class _MainViewKillButton extends StatelessWidget {
   }
 }
 
-class _MainViewPresets extends StatelessWidget {
+class _MainViewPresetButtonState extends State<_MainViewPresetButton> {
   @override
   Widget build(BuildContext context) {
-    List<String> presets = _getAllAvailablePresets();
-    List<Widget> widgetList = [];
-    for (String value in presets) {
-      widgetList.add(
-        TextButton(onPressed: () {}, child: Text(value)),
-      );
-    }
+    String title = _getPresetTitelForIndex(widget.index);
     return Expanded(
-      child: Columns(2, widgetList),
+      child: TextButton(
+        style:
+            TextButton.styleFrom(minimumSize: const Size(double.infinity, 0)),
+        onPressed: () {
+          if (_getPresetTitelForIndex(widget.index) == '[none]') {
+            _openPresetSetterView(widget.index);
+            // TODO: Whe the setter view changes the preset the main view should dynamically change too
+          } else {
+            _playPreset(widget.index);
+          }
+        },
+        onLongPress: () => _openPresetSetterView(widget.index),
+        child: Text(title),
+      ),
     );
   }
 }
 
-/*
-class _MainViewEntities extends StatelessWidget {
-  // TODO
-}
-*/
+class _MainViewPresetButton extends StatefulWidget {
+  const _MainViewPresetButton({required this.index});
+  final int index;
 
-class _MainViewState extends State<StatefulWidget> {
+  @override
+  State<StatefulWidget> createState() => _MainViewPresetButtonState();
+}
+
+class _MainViewPresets extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    List<Widget> widgetList = [];
+    for (int i = 0; i < numberOfPresetButtons; i++) {
+      widgetList.add(
+        _MainViewPresetButton(
+          index: i,
+        ),
+      );
+    }
+    return SliverToBoxAdapter(
+      child: Container(
+        color: Colors.purple,
+        height: MediaQuery.of(context).size.height / 2,
+        child: Columns(
+          2,
+          widgetList,
+        ),
+      ),
+    );
+  }
+}
+
+class LedEntity {
+  final String name;
+  final String currentlyPlayingAnimation;
+  final bool isOn;
+  final int brightness;
+
+  LedEntity(
+      this.name, this.currentlyPlayingAnimation, this.isOn, this.brightness);
+}
+
+class _LedEntitySimpleButtonState extends State<LedEntitySimpleButton> {
+  _LedEntitySimpleButtonState();
+  @override
+  Widget build(BuildContext context) {
+    LedEntity entity = _getLedEntityByName(widget.entity.name);
+    final style =
+        entity.isOn ? ledEntityButtonOnStyle : ledEntityButtonOffStyle;
+    return TextButton(
+      onPressed: () {
+        setState(
+          () {
+            _togglePowerState(entity);
+          },
+        );
+      },
+      onLongPress: () {
+        _openDetailedLedView(entity);
+      },
+      style: style,
+      child: Row(children: [
+        Text(entity.name),
+        Text(entity.currentlyPlayingAnimation),
+      ]),
+    );
+  }
+}
+
+class LedEntitySimpleButton extends StatefulWidget {
+  const LedEntitySimpleButton(this.entity, {super.key});
+  final LedEntity entity;
+
+  @override
+  State<StatefulWidget> createState() {
+    return _LedEntitySimpleButtonState();
+  }
+}
+
+/*
+  TODO: Make this widget refresh when the entities change
+*/
+class _MainViewEntities extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final entities = _getAllAvailableEntities();
+    List<Widget> widgetEntites = [];
+    for (var element in entities) {
+      widgetEntites.add(
+        SizedBox(
+          height: MediaQuery.of(context).size.height / 5,
+          child: LedEntitySimpleButton(
+            element,
+          ),
+        ),
+      );
+    }
+    return SliverToBoxAdapter(
+      child: Columns(
+        2,
+        widgetEntites,
+      ),
+    );
+  }
+}
+
+class MainView extends StatelessWidget {
+  const MainView({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -76,16 +222,10 @@ class _MainViewState extends State<StatefulWidget> {
         slivers: <Widget>[
           _MainViewAppBar(),
           _MainViewKillButton(),
-          _MainViewPresets()
+          _MainViewPresets(),
+          _MainViewEntities(),
         ],
       ),
     );
   }
-}
-
-class MainView extends StatefulWidget {
-  const MainView({super.key});
-
-  @override
-  State<StatefulWidget> createState() => _MainViewState();
 }
