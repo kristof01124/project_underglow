@@ -1,6 +1,5 @@
 import 'dart:developer';
 
-import 'package:analyzer_plugin/utilities/pair.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:learning_dart/include/ArduinoNetwork/animation_message.dart';
@@ -12,9 +11,17 @@ import 'package:learning_dart/widgets/stateful_slider.dart';
 */
 
 /*
+  TODO: create a class that holds a value and a bool that tells us if the value is fixed  or not.
+*/
+
+/*
   TODO: implement a ColorPicker and Slider class, that has the following functionality:
     - Has a title by default
     - Has some basic parameters set by default
+*/
+
+/*
+  TODO: Generalize the widget building process of the widget creator
 */
 
 class AnimationCreatorApplyButton extends StatelessWidget {
