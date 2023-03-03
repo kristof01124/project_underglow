@@ -1,14 +1,19 @@
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_colorpicker/flutter_colorpicker.dart';
+import 'package:learning_dart/include/ArduinoNetwork/animation_message.dart';
 import 'package:learning_dart/include/ArduinoNetwork/message.dart';
 import 'package:learning_dart/widgets/stateful_slider.dart';
 
+import 'color_picker.dart';
+
 class ValueWithDefault<T> {
   T value;
-  bool isDefault = false;
+  bool isDefault;
+  bool editing;
 
-  ValueWithDefault(this.value);
+  ValueWithDefault(this.value, {this.isDefault = false, this.editing = false});
 }
 
 class AnimationCreatorWrapper extends StatelessWidget {
@@ -20,9 +25,14 @@ class AnimationCreatorWrapper extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (value.editing) {
+      return child;
+    }
     return Row(
       children: [
-        child,
+        Expanded(
+          child: child,
+        ),
         Checkbox(
           value: value.isDefault,
           onChanged: (checkboxValue) {
@@ -64,6 +74,33 @@ class AnimationCreatorSlider extends StatelessWidget {
   }
 }
 
+class AnimationCreatorColorWheel extends StatelessWidget {
+  final ValueWithDefault<Color> currentValue;
+
+  const AnimationCreatorColorWheel({
+    super.key,
+    required this.currentValue,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    if (currentValue.isDefault) {
+      return const SizedBox.shrink();
+    }
+    return AnimationCreatorWrapper(
+      value: currentValue,
+      child: ColorPicker(
+        enableAlpha: false,
+        labelTypes: const [],
+        pickerColor: currentValue.value,
+        onColorChanged: (color) {
+          currentValue.value = color;
+        },
+      ),
+    );
+  }
+}
+
 class AnimationCreatorApplyButton extends StatelessWidget {
   final AnimationCreator creator;
 
@@ -73,7 +110,9 @@ class AnimationCreatorApplyButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        creator.build(),
+        Expanded(
+          child: creator.build(),
+        ),
         TextButton(
           onPressed: () {
             creator.onButtonPressed?.call(creator);
@@ -98,4 +137,36 @@ abstract class AnimationCreator {
   AnimationCreator({this.onButtonPressed});
 }
 
-class FillEffectCreator extends AnimationCreator {}
+// This class is gonna be used for AnimationCreators, that are built up of primitives
+abstract class SegmentAnimationCreator extends AnimationCreator {
+  List<Widget> children = [];
+
+  @override
+  Widget build() {
+    return Column(
+      children: children,
+    );
+  }
+}
+
+class FillEffectCreator extends SegmentAnimationCreator {
+  ValueWithDefault<double> duration = ValueWithDefault(0, isDefault: true);
+  ValueWithDefault<Color> color = ValueWithDefault(Colors.black);
+
+  FillEffectCreator({Function(AnimationCreator)? onButtonPressed}) {
+    super.onButtonPressed = onButtonPressed;
+    children.add(
+      AnimationCreatorColorWheel(currentValue: color),
+    );
+  }
+
+  @override
+  Message send() {
+    return FillEffectMessageBuilder(
+      FillEffectMessage(
+        duration.value.toInt(),
+        color.value,
+      ),
+    );
+  }
+}

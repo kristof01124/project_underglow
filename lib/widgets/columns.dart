@@ -6,11 +6,13 @@ class Columns extends StatelessWidget {
   final int numberOfColumns;
   final List<Widget> children;
 
-  const Columns(this.numberOfColumns, this.children, {super.key});
+  const Columns(
+      {required this.numberOfColumns, required this.children, super.key});
 
   @override
   Widget build(BuildContext context) {
-    final columnLength = (children.length + numberOfColumns - 1) ~/ numberOfColumns;
+    final columnLength =
+        (children.length + numberOfColumns - 1) ~/ numberOfColumns;
     List<Widget> outputChildren = [];
     for (int i = 0; i < numberOfColumns; i++) {
       int end = (i + 1) * columnLength;

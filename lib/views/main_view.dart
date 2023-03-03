@@ -130,8 +130,8 @@ class _MainViewPresets extends StatelessWidget {
         color: Colors.purple,
         height: MediaQuery.of(context).size.height / 2,
         child: Columns(
-          2,
-          widgetList,
+          numberOfColumns: 2,
+          children: widgetList,
         ),
       ),
     );
@@ -205,8 +205,8 @@ class _MainViewEntities extends StatelessWidget {
     }
     return SliverToBoxAdapter(
       child: Columns(
-        2,
-        widgetEntites,
+        numberOfColumns: 2,
+        children: widgetEntites,
       ),
     );
   }
