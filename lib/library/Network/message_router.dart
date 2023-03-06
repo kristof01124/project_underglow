@@ -1,6 +1,6 @@
-import 'package:learning_dart/include/ArduinoNetwork/network_manager.dart';
-import 'package:learning_dart/include/ArduinoNetwork/message.dart';
-import 'package:learning_dart/include/ArduinoNetwork/network_entity.dart';
+import 'package:learning_dart/library/ArduinoNetwork/network_manager.dart';
+import 'package:learning_dart/library/ArduinoNetwork/message.dart';
+import 'package:learning_dart/library/ArduinoNetwork/network_entity.dart';
 
 class MessageRouterRecord {
   IP ipOfDevice;

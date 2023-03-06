@@ -2,8 +2,8 @@ import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
-import 'package:learning_dart/include/ArduinoNetwork/animation_message.dart';
-import 'package:learning_dart/include/ArduinoNetwork/message.dart';
+import 'package:learning_dart/library/ArduinoNetwork/animation_message.dart';
+import 'package:learning_dart/library/ArduinoNetwork/message.dart';
 import 'package:learning_dart/widgets/stateful_slider.dart';
 
 import 'color_picker.dart';
@@ -16,33 +16,42 @@ class ValueWithDefault<T> {
   ValueWithDefault(this.value, {this.isDefault = false, this.editing = false});
 }
 
-class AnimationCreatorWrapper extends StatelessWidget {
-  final Widget child;
-  final ValueWithDefault value;
-
-  const AnimationCreatorWrapper(
-      {super.key, required this.child, required this.value});
-
+class _AnimationCreatorWrapperState extends State<AnimationCreatorWrapper> {
   @override
   Widget build(BuildContext context) {
-    if (value.editing) {
-      return child;
+    if (widget.value.editing) {
+      return widget.child;
     }
     return Row(
       children: [
         Expanded(
-          child: child,
+          child: widget.child,
         ),
         Checkbox(
-          value: value.isDefault,
+          value: widget.value.isDefault,
           onChanged: (checkboxValue) {
             if (checkboxValue != null) {
-              value.isDefault = checkboxValue;
+              setState(() {
+                widget.value.isDefault = checkboxValue;
+              });
             }
           },
         ),
       ],
     );
+  }
+}
+
+class AnimationCreatorWrapper extends StatefulWidget {
+  final Widget child;
+  final ValueWithDefault value;
+
+  const AnimationCreatorWrapper(
+      {super.key, required this.child, required this.value});
+  
+  @override
+  State<StatefulWidget> createState() {
+    return _AnimationCreatorWrapperState();
   }
 }
 
@@ -89,10 +98,7 @@ class AnimationCreatorColorWheel extends StatelessWidget {
     }
     return AnimationCreatorWrapper(
       value: currentValue,
-      child: ColorPicker(
-        enableAlpha: false,
-        labelTypes: const [],
-        pickerColor: currentValue.value,
+      child: MyColorPicker(
         onColorChanged: (color) {
           currentValue.value = color;
         },
@@ -153,7 +159,7 @@ class FillEffectCreator extends SegmentAnimationCreator {
   ValueWithDefault<double> duration = ValueWithDefault(0, isDefault: true);
   ValueWithDefault<Color> color = ValueWithDefault(Colors.black);
 
-  FillEffectCreator({Function(AnimationCreator)? onButtonPressed}) {
+  FillEffectCreator({Function(AnimationCreator creator)? onButtonPressed}) {
     super.onButtonPressed = onButtonPressed;
     children.add(
       AnimationCreatorColorWheel(currentValue: color),

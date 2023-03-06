@@ -1,4 +1,4 @@
-import 'package:learning_dart/include/ArduinoNetwork/network_entity.dart';
+import 'package:learning_dart/library/ArduinoNetwork/network_entity.dart';
 
 class NetworkManager {
   static const int protocol = 1;

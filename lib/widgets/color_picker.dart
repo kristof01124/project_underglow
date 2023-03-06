@@ -80,9 +80,9 @@ class _MyColorPickerState extends State<MyColorPicker> {
       child: Column(
         children: [
           Padding(
-            padding: const EdgeInsets.symmetric(
+            padding: EdgeInsets.symmetric(
               vertical: 0,
-              horizontal: 20.0,
+              horizontal: height / 20,
             ),
             child: SizedBox(
               height: height * 7 / 10,
@@ -102,12 +102,13 @@ class _MyColorPickerState extends State<MyColorPicker> {
             ),
           ),
           SizedBox(
-            height: height / 8,
+            height: height / 9,
             width: width,
             child: ColorPickerPalette(
               onColorChanged: (color) {
                 setState(
                   () {
+                    widget.onColorChanged?.call(color);
                     this.color = HSVColor.fromColor(color);
                   },
                 );

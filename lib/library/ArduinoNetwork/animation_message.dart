@@ -105,22 +105,10 @@ enum AnimationObjectType {
 class DynamicAnimationMessageBody extends SegmentMessage {
   DynamicAnimationMessageBody(
       [double delta = 0, double min = 0, double max = 0, int index = 0]) {
-    add(
-      'delta',
-      MessageFloat32(delta),
-    );
-    add(
-      'min',
-      MessageFloat32(min),
-    );
-    add(
-      'max',
-      MessageFloat32(max),
-    );
-    add(
-      'index',
-      MessageUint16(index),
-    );
+    add('delta', MessageFloat32(delta));
+    add('min', MessageFloat32(min));
+    add('max', MessageFloat32(max));
+    add('index', MessageUint16(index));
   }
 
   double get delta => (segments['delta'] as MessageFloat32).value;

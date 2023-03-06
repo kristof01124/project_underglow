@@ -1,4 +1,4 @@
-import 'package:learning_dart/include/ArduinoNetwork/network_manager.dart';
+import 'package:learning_dart/library/ArduinoNetwork/network_manager.dart';
 
 import 'message.dart';
 import 'network_entity.dart';

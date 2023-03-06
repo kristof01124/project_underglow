@@ -3,7 +3,7 @@ import 'dart:collection';
 
 import 'package:async/async.dart';
 import 'package:flutter_reactive_ble/flutter_reactive_ble.dart';
-import 'package:learning_dart/include/ArduinoNetwork/serial.dart';
+import 'package:learning_dart/library/ArduinoNetwork/serial.dart';
 
 const serviceId = "a4c60af7-ef0b-44f5-a456-099136c6777d";
 const writeCharacteristicId = "19f8b7ee-7721-4bcb-94b5-a40e059612e4";
@@ -33,7 +33,7 @@ class BleSerial extends Serial {
           serviceId: Uuid.parse(serviceId),
           deviceId: deviceId,
         ) {
-    // Create background task
+    // Create background tasks
     handleReading();
     handleWriting();
   }
