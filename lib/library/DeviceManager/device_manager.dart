@@ -14,6 +14,7 @@ Device underglowDevice = Device(name: "Underglow", ip: underglowIp);
 Map<IP, Device> _devices = {};
 Map<IP, Widget> _listView = {};
 Map<IP, Widget> _detailedView = {};
+Map<IP, Message> _deviceData = {};
 
 /*
   This class is gonna connect the IP-s to leds, and their functionality
@@ -49,6 +50,10 @@ class DeviceManager {
 
   static Widget getListView(Device device) {
     return (_listView[device.ip] as Widget);
+  }
+
+  static Message getDeviceData(Device device) {
+    return (_deviceData[device.ip] as Message);
   }
 }
 
