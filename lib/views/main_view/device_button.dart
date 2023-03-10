@@ -54,10 +54,9 @@ class _DeviceButtonState extends State<DeviceButton> {
       },
       onLongPress: () {
         // get the detailed device view
+        // ignore: unused_local_variable
         Widget detailedView = DeviceManager.getDetailedView(widget.device);
-        detailedView.key;
-        // then navigate to it
-        // TODO
+        // TODO: then navigate to it
       },
       style: style,
       child: Text(widget.device.name),

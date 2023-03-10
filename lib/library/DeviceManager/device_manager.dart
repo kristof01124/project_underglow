@@ -11,7 +11,16 @@ IP underglowIp = const IP(12);
 
 Device underglowDevice = Device(name: "Underglow", ip: underglowIp);
 
-Map<IP, Device> _devices = {};
+Map<IP, Device> _devices = {
+  underglowIp: Device(
+    ip: underglowIp,
+    name: 'Underglow',
+  ),
+  const IP(13): Device(
+    ip: const IP(13),
+    name: 'Left index',
+  ),
+};
 Map<IP, Widget> _listView = {};
 Map<IP, Widget> _detailedView = {};
 Map<IP, Object> _deviceData = {};
@@ -53,6 +62,7 @@ class Device {
 // THis class is gonna handle the stuff that all the Devices will need
 class DeviceManager {
   static List<Device> getDevices() {
+    return _devices.values.toList();
     List out = MessageRouter.advertisedRecords.keys.toList(growable: true);
     out.removeWhere((element) => !_devices.keys.toList().contains(element));
     return out.map((e) => (_devices[e] as Device)).toList();
