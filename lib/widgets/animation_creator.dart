@@ -6,7 +6,7 @@ import 'package:learning_dart/library/ArduinoNetwork/animation_message.dart';
 import 'package:learning_dart/library/ArduinoNetwork/message.dart';
 import 'package:learning_dart/widgets/stateful_slider.dart';
 
-import 'color_picker.dart';
+import 'my_color_picker.dart';
 
 class ValueWithDefault<T> {
   T value;

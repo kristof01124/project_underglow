@@ -14,7 +14,21 @@ Device underglowDevice = Device(name: "Underglow", ip: underglowIp);
 Map<IP, Device> _devices = {};
 Map<IP, Widget> _listView = {};
 Map<IP, Widget> _detailedView = {};
-Map<IP, Message> _deviceData = {};
+Map<IP, Object> _deviceData = {};
+
+class LedDeviceState {
+  bool on;
+  String animationName;
+  Message? currentlyPlayingAnimation;
+  int brightness;
+
+  LedDeviceState(
+    this.on,
+    this.animationName,
+    this.currentlyPlayingAnimation,
+    this.brightness,
+  );
+}
 
 /*
   This class is gonna connect the IP-s to leds, and their functionality
@@ -52,8 +66,12 @@ class DeviceManager {
     return (_listView[device.ip] as Widget);
   }
 
-  static Message getDeviceData(Device device) {
-    return (_deviceData[device.ip] as Message);
+  static Object getData(Device device) {
+    return (_deviceData[device.ip] as Object);
+  }
+
+  static Object setData(Device device, Object data) {
+    return _deviceData[device.ip] = data;
   }
 }
 
