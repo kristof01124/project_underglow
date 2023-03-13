@@ -1,5 +1,3 @@
-import 'dart:html';
-
 import 'package:learning_dart/library/ArduinoNetwork/network_entity.dart';
 import 'package:learning_dart/library/ArduinoNetwork/network_manager.dart';
 

@@ -17,15 +17,19 @@ class PresetButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return TextButton(
-      onPressed: () {
-        if (presetName == defaultPresetName) {
-          // TODO: Push the preset creator view to the screen.
-        }
-        PresetManager.run(presetName);
-      },
-      style: presetButtonStyle,
-      child: Text(presetName),
+    return SizedBox(
+      width: double.infinity,
+      height: MediaQuery.of(context).size.height / 6,
+      child: TextButton(
+        onPressed: () {
+          if (presetName == defaultPresetName) {
+            // TODO: Push the preset creator view to the screen.
+          }
+          PresetManager.run(presetName);
+        },
+        style: presetButtonStyle,
+        child: Text(presetName),
+      ),
     );
   }
 }

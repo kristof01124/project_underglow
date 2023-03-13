@@ -8,6 +8,6 @@ void main() {
     const MaterialApp(
         home: Scaffold(
       body: MainView(),
-    )),
+    ),),
   );
 }

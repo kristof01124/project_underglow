@@ -42,24 +42,28 @@ class _DeviceButtonState extends State<DeviceButton> {
     if (!(DeviceManager.getData(widget.device) as LedDeviceState).on) {
       style = widget.offStyle;
     }
-    return TextButton(
-      onPressed: () {
-        setState(
-          () {
-            LedDeviceState data =
-                (DeviceManager.getData(widget.device) as LedDeviceState);
-            data.on = !data.on;
-          },
-        );
-      },
-      onLongPress: () {
-        // get the detailed device view
-        // ignore: unused_local_variable
-        Widget detailedView = DeviceManager.getDetailedView(widget.device);
-        // TODO: then navigate to it
-      },
-      style: style,
-      child: Text(widget.device.name),
+    return SizedBox(
+      width: double.infinity,
+      height: MediaQuery.of(context).size.height / 6,
+      child: TextButton(
+        onPressed: () {
+          setState(
+            () {
+              LedDeviceState data =
+                  (DeviceManager.getData(widget.device) as LedDeviceState);
+              data.on = !data.on;
+            },
+          );
+        },
+        onLongPress: () {
+          // get the detailed device view
+          // ignore: unused_local_variable
+          Widget detailedView = DeviceManager.getDetailedView(widget.device);
+          // TODO: then navigate to it
+        },
+        style: style,
+        child: Text(widget.device.name),
+      ),
     );
   }
 }

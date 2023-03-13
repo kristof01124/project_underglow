@@ -23,7 +23,18 @@ Map<IP, Device> _devices = {
 };
 Map<IP, Widget> _listView = {};
 Map<IP, Widget> _detailedView = {};
-Map<IP, Object> _deviceData = {};
+Map<IP, Object> _deviceData = {
+  underglowIp: LedDeviceState(
+    on: true,
+    animationName: 'Fill',
+    brightness: 200,
+  ),
+  const IP(13): LedDeviceState(
+    on: true,
+    animationName: 'Fill',
+    brightness: 200,
+  ),
+};
 
 class LedDeviceState {
   bool on;
@@ -31,12 +42,12 @@ class LedDeviceState {
   Message? currentlyPlayingAnimation;
   int brightness;
 
-  LedDeviceState(
-    this.on,
-    this.animationName,
+  LedDeviceState({
+    required this.on,
+    required this.animationName,
     this.currentlyPlayingAnimation,
-    this.brightness,
-  );
+    required this.brightness,
+  });
 }
 
 /*
