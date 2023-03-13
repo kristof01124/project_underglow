@@ -117,6 +117,11 @@ class DeviceManager {
     _deviceData[device.ip] = data;
   }
 
+/*
+  Interior leds should have an ip between 16 and 128
+  Exterior leds should have an ip between 128 and 256
+*/
+
   static bool isInterior(Device device) {
     return device.ip.entityIp < 128 && device.ip.entityIp > 16;
   }

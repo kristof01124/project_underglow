@@ -6,27 +6,32 @@ import 'package:learning_dart/views/main_view/main_view_header.dart';
 import 'package:learning_dart/views/main_view/preset_button.dart';
 import 'package:learning_dart/widgets/columns.dart';
 
-const titleGrey = Color.fromRGBO(102, 102, 102, 1.0);
+// PARAMETERS
 
-const textStyleLeft = TextStyle(color: titleGrey, fontSize: 25, shadows: [
+const titleColor = Color.fromRGBO(102, 102, 102, 1.0);
+
+const textStyleLeft = TextStyle(color: titleColor, fontSize: 25, shadows: [
   Shadow(
     blurRadius: 2,
     offset: Offset(1, 1),
-    color: titleGrey,
+    color: titleColor,
   ),
 ]);
 
 const textStyleRight = TextStyle(
-  color: titleGrey,
+  color: titleColor,
   fontSize: 20,
   shadows: [
     Shadow(
       blurRadius: 2,
       offset: Offset(1, 1),
-      color: titleGrey,
+      color: titleColor,
     ),
   ],
 );
+
+const deviceButtonPadding = EdgeInsets.all(5.0);
+const titlePadding = EdgeInsets.symmetric(horizontal: 8);
 
 class MainView extends StatelessWidget {
   const MainView({super.key});
@@ -43,7 +48,7 @@ class MainView extends StatelessWidget {
                 for (Widget widget in [interiorButton, exteriorButton])
                   Expanded(
                     child: Padding(
-                      padding: const EdgeInsets.all(5.0),
+                      padding: deviceButtonPadding,
                       child: widget,
                     ),
                   ),
@@ -52,9 +57,7 @@ class MainView extends StatelessWidget {
           ),
           SliverToBoxAdapter(
             child: Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 8,
-              ),
+              padding: titlePadding,
               child: Row(
                 children: [
                   const Align(
@@ -87,7 +90,7 @@ class MainView extends StatelessWidget {
                 children: PresetManager.menuPresets
                     .map(
                       (e) => Padding(
-                        padding: const EdgeInsets.all(5),
+                        padding: deviceButtonPadding,
                         child: PresetButton(presetName: e),
                       ),
                     )
@@ -97,9 +100,7 @@ class MainView extends StatelessWidget {
           ),
           SliverToBoxAdapter(
             child: Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 8,
-              ),
+              padding: titlePadding,
               child: Row(
                 children: [
                   const Align(
@@ -131,7 +132,7 @@ class MainView extends StatelessWidget {
               children: DeviceManager.getDevices()
                   .map(
                     (e) => Padding(
-                      padding: const EdgeInsets.all(5),
+                      padding: deviceButtonPadding,
                       child: DeviceButton(
                         devices: [e],
                         title: e.name,
