@@ -7,7 +7,8 @@ import '../ArduinoNetwork/message.dart';
 /*
   THESE ARE HARDCODED CONSTANT PARTS, THIS MAKES THE MOST SENSE TO BE HERE, BUT SHOULD BE MOVED TO A CONFIG FILE LATER
 */
-IP underglowIp = const IP(12);
+IP underglowIp = const IP(18);
+IP leftIndexIP = const IP(17);
 
 Device underglowDevice = Device(name: "Underglow", ip: underglowIp);
 
@@ -16,21 +17,21 @@ Map<IP, Device> _devices = {
     ip: underglowIp,
     name: 'Underglow',
   ),
-  const IP(13): Device(
-    ip: const IP(13),
+  leftIndexIP: Device(
+    ip: leftIndexIP,
     name: 'Left index',
   ),
 };
 Map<IP, Widget> _listView = {};
 Map<IP, Widget> _detailedView = {};
-Map<IP, Object> _deviceData = {
+Map<IP, LedDeviceState> _deviceData = {
   underglowIp: LedDeviceState(
     on: true,
     animationName: 'Fill',
     brightness: 200,
   ),
-  const IP(13): LedDeviceState(
-    on: true,
+  leftIndexIP: LedDeviceState(
+    on: false,
     animationName: 'Fill',
     brightness: 200,
   ),
@@ -74,9 +75,30 @@ class Device {
 class DeviceManager {
   static List<Device> getDevices() {
     return _devices.values.toList();
+    // ignore: dead_code
     List out = MessageRouter.advertisedRecords.keys.toList(growable: true);
     out.removeWhere((element) => !_devices.keys.toList().contains(element));
     return out.map((e) => (_devices[e] as Device)).toList();
+  }
+
+  static List<Device> getInteriorDevices() {
+    List<Device> out = [];
+    for (var device in getDevices()) {
+      if (isInterior(device)) {
+        out.add(device);
+      }
+    }
+    return out;
+  }
+
+  static List<Device> getExteriorDevices() {
+    List<Device> out = [];
+    for (var device in getDevices()) {
+      if (isExterior(device)) {
+        out.add(device);
+      }
+    }
+    return out;
   }
 
   static Widget getDetailedView(Device device) {
@@ -87,12 +109,20 @@ class DeviceManager {
     return (_listView[device.ip] as Widget);
   }
 
-  static Object getData(Device device) {
-    return (_deviceData[device.ip] as Object);
+  static LedDeviceState getData(Device device) {
+    return (_deviceData[device.ip] as LedDeviceState);
   }
 
-  static Object setData(Device device, Object data) {
-    return _deviceData[device.ip] = data;
+  static void setData(Device device, LedDeviceState data) {
+    _deviceData[device.ip] = data;
+  }
+
+  static bool isInterior(Device device) {
+    return device.ip.entityIp < 128 && device.ip.entityIp > 16;
+  }
+
+  static bool isExterior(Device device) {
+    return device.ip.entityIp >= 128 && device.ip.entityIp < 256;
   }
 }
 

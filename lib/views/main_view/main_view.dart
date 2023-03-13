@@ -6,25 +6,24 @@ import 'package:learning_dart/views/main_view/main_view_header.dart';
 import 'package:learning_dart/views/main_view/preset_button.dart';
 import 'package:learning_dart/widgets/columns.dart';
 
-const textStyleLeft = TextStyle(
-    color: Color.fromRGBO(102, 102, 102, 1.0),
-    fontSize: 25,
-    shadows: [
-      Shadow(
-        blurRadius: 2,
-        offset: Offset(1, 1),
-        color: Color.fromRGBO(102, 102, 102, 1.0),
-      ),
-    ]);
+const titleGrey = Color.fromRGBO(102, 102, 102, 1.0);
+
+const textStyleLeft = TextStyle(color: titleGrey, fontSize: 25, shadows: [
+  Shadow(
+    blurRadius: 2,
+    offset: Offset(1, 1),
+    color: titleGrey,
+  ),
+]);
 
 const textStyleRight = TextStyle(
-  color: Color.fromRGBO(102, 102, 102, 1.0),
+  color: titleGrey,
   fontSize: 20,
   shadows: [
     Shadow(
       blurRadius: 2,
       offset: Offset(1, 1),
-      color: Color.fromRGBO(102, 102, 102, 1.0),
+      color: titleGrey,
     ),
   ],
 );
@@ -38,6 +37,19 @@ class MainView extends StatelessWidget {
       body: CustomScrollView(
         slivers: [
           const MainViewHeader(),
+          SliverToBoxAdapter(
+            child: Row(
+              children: [
+                for (Widget widget in [interiorButton, exteriorButton])
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.all(5.0),
+                      child: widget,
+                    ),
+                  ),
+              ],
+            ),
+          ),
           SliverToBoxAdapter(
             child: Padding(
               padding: const EdgeInsets.symmetric(
@@ -121,7 +133,8 @@ class MainView extends StatelessWidget {
                     (e) => Padding(
                       padding: const EdgeInsets.all(5),
                       child: DeviceButton(
-                        device: e,
+                        devices: [e],
+                        title: e.name,
                         onStyle: ledDeviceOnStyle,
                         offStyle: ledDeviceOffStyle,
                       ),

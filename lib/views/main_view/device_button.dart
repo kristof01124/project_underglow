@@ -11,22 +11,52 @@ ButtonStyle ledDeviceOnStyle = TextButton.styleFrom(
 );
 
 ButtonStyle ledDeviceOffStyle = TextButton.styleFrom(
-    foregroundColor: Colors.black,
-    backgroundColor: Colors.red,
-    shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(10),
-      side: const BorderSide(color: Colors.black),
-    ));
+  foregroundColor: Colors.black,
+  backgroundColor: Colors.red,
+  shape: RoundedRectangleBorder(
+    borderRadius: BorderRadius.circular(10),
+    side: const BorderSide(color: Colors.black),
+  ),
+);
+
+ButtonStyle ledDeviceUnavailableStyle = TextButton.styleFrom(
+  foregroundColor: Colors.black,
+  backgroundColor: Colors.grey,
+  shape: RoundedRectangleBorder(
+    borderRadius: BorderRadius.circular(10),
+    side: const BorderSide(color: Colors.black),
+  ),
+);
+
+DeviceButton interiorButton = DeviceButton(
+  devices: DeviceManager.getInteriorDevices(),
+  onStyle: ledDeviceOnStyle,
+  offStyle: ledDeviceOffStyle,
+  unavailableStyle: ledDeviceUnavailableStyle,
+  title: 'Interior',
+);
+
+DeviceButton exteriorButton = DeviceButton(
+  devices: DeviceManager.getExteriorDevices(),
+  onStyle: ledDeviceOnStyle,
+  offStyle: ledDeviceOffStyle,
+  unavailableStyle: ledDeviceUnavailableStyle,
+  title: 'Exterior',
+);
 
 class DeviceButton extends StatefulWidget {
-  final Device device;
+  final List<Device> devices;
   final ButtonStyle onStyle, offStyle;
+  final ButtonStyle? unavailableStyle;
+  final String title;
 
   const DeviceButton({
     super.key,
-    required this.device,
+    required this.devices,
     required this.onStyle,
     required this.offStyle,
+    this.unavailableStyle,
+    required this.title,
   });
 
   @override
@@ -38,31 +68,35 @@ class DeviceButton extends StatefulWidget {
 class _DeviceButtonState extends State<DeviceButton> {
   @override
   Widget build(BuildContext context) {
-    ButtonStyle style = widget.onStyle;
-    if (!(DeviceManager.getData(widget.device) as LedDeviceState).on) {
-      style = widget.offStyle;
+    ButtonStyle style = widget.offStyle;
+    if (widget.devices.isEmpty && widget.unavailableStyle != null) {
+      style = (widget.unavailableStyle as ButtonStyle);
+    }
+    for (Device device in widget.devices) {
+      if ((DeviceManager.getData(device)).on) {
+        style = widget.onStyle;
+      }
     }
     return SizedBox(
       width: double.infinity,
-      height: MediaQuery.of(context).size.height / 6,
+      height: MediaQuery.of(context).size.height / 7.5,
       child: TextButton(
         onPressed: () {
           setState(
-            () {
-              LedDeviceState data =
-                  (DeviceManager.getData(widget.device) as LedDeviceState);
-              data.on = !data.on;
-            },
+            () {},
           );
         },
         onLongPress: () {
-          // get the detailed device view
-          // ignore: unused_local_variable
-          Widget detailedView = DeviceManager.getDetailedView(widget.device);
-          // TODO: then navigate to it
+          if (widget.devices.length == 1) {
+            // get the detailed device view
+            // ignore: unused_local_variable
+            Widget detailedView =
+                DeviceManager.getDetailedView(widget.devices[0]);
+            // TODO: then navigate to it
+          }
         },
         style: style,
-        child: Text(widget.device.name),
+        child: Text(widget.title),
       ),
     );
   }

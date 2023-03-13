@@ -19,7 +19,7 @@ class PresetButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return SizedBox(
       width: double.infinity,
-      height: MediaQuery.of(context).size.height / 6,
+      height: MediaQuery.of(context).size.height / 7.5,
       child: TextButton(
         onPressed: () {
           if (presetName == defaultPresetName) {
