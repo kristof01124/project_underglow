@@ -1,15 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:learning_dart/library/DeviceManager/device_manager.dart';
 import 'package:learning_dart/views/preset_creator_view/device_button.dart';
+import 'package:learning_dart/views/preset_creator_view/preset_creator_popup.dart';
 import 'package:learning_dart/widgets/folded_header.dart';
 
 double heightRatio = 1 / 6;
 
 const EdgeInsets padding = EdgeInsets.symmetric(vertical: 5, horizontal: 15);
 
-const ButtonStyle savePresetButtonStyle = ButtonStyle(
-  
-);
+const ButtonStyle savePresetButtonStyle = ButtonStyle();
 
 class PresetCreatorView extends StatelessWidget {
   const PresetCreatorView({super.key});
@@ -47,7 +46,14 @@ class PresetCreatorView extends StatelessWidget {
                 Padding(
                   padding: padding,
                   child: TextButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      showDialog(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return const PresetCreatorPopup();
+                        },
+                      );
+                    },
                     style: savePresetButtonStyle,
                     child: const Text('Save current preset'),
                   ),
