@@ -40,7 +40,7 @@ Map<IP, LedDeviceState> _deviceData = {
 class LedDeviceState {
   bool on;
   String animationName;
-  Message? currentlyPlayingAnimation;
+  AnimationCreator? currentlyPlayingAnimation;
   int brightness;
 
   LedDeviceState({
