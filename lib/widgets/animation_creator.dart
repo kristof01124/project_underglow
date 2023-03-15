@@ -19,23 +19,28 @@ class ValueWithDefault<T> {
 class _AnimationCreatorWrapperState extends State<AnimationCreatorWrapper> {
   @override
   Widget build(BuildContext context) {
-    if (widget.value.editing) {
+    if (!widget.value.editing) {
       return widget.child;
     }
-    return Row(
+    return Column(
       children: [
-        Expanded(
-          child: widget.child,
-        ),
-        Checkbox(
-          value: widget.value.isDefault,
-          onChanged: (checkboxValue) {
-            if (checkboxValue != null) {
-              setState(() {
-                widget.value.isDefault = checkboxValue;
-              });
-            }
-          },
+        Text(widget.name),
+        Row(
+          children: [
+            Expanded(
+              child: widget.child,
+            ),
+            Checkbox(
+              value: widget.value.isDefault,
+              onChanged: (checkboxValue) {
+                if (checkboxValue != null) {
+                  setState(() {
+                    widget.value.isDefault = checkboxValue;
+                  });
+                }
+              },
+            ),
+          ],
         ),
       ],
     );
@@ -45,10 +50,15 @@ class _AnimationCreatorWrapperState extends State<AnimationCreatorWrapper> {
 class AnimationCreatorWrapper extends StatefulWidget {
   final Widget child;
   final ValueWithDefault value;
+  final String name;
 
-  const AnimationCreatorWrapper(
-      {super.key, required this.child, required this.value});
-  
+  const AnimationCreatorWrapper({
+    super.key,
+    required this.child,
+    required this.value,
+    required this.name,
+  });
+
   @override
   State<StatefulWidget> createState() {
     return _AnimationCreatorWrapperState();
@@ -58,12 +68,14 @@ class AnimationCreatorWrapper extends StatefulWidget {
 class AnimationCreatorSlider extends StatelessWidget {
   final double min, max;
   final ValueWithDefault<double> currentValue;
+  final String name;
 
   const AnimationCreatorSlider({
     super.key,
     required this.min,
     required this.max,
     required this.currentValue,
+    required this.name,
   });
 
   @override
@@ -72,6 +84,7 @@ class AnimationCreatorSlider extends StatelessWidget {
       return const SizedBox.shrink();
     }
     return AnimationCreatorWrapper(
+      name: name,
       value: currentValue,
       child: StatefulSlider(
         value: currentValue.value,
@@ -85,10 +98,12 @@ class AnimationCreatorSlider extends StatelessWidget {
 
 class AnimationCreatorColorWheel extends StatelessWidget {
   final ValueWithDefault<Color> currentValue;
+  final String name;
 
   const AnimationCreatorColorWheel({
     super.key,
     required this.currentValue,
+    required this.name,
   });
 
   @override
@@ -97,6 +112,7 @@ class AnimationCreatorColorWheel extends StatelessWidget {
       return const SizedBox.shrink();
     }
     return AnimationCreatorWrapper(
+      name: name,
       value: currentValue,
       child: MyColorPicker(
         onColorChanged: (color) {
@@ -135,17 +151,31 @@ abstract class AnimationCreator {
     TODO: Get json representation
     Requirement: json handler implementation
   */
+  bool isDefault, editing;
+
   Widget build();
   Message send();
+  String name;
 
   Function(AnimationCreator)? onButtonPressed;
 
-  AnimationCreator({this.onButtonPressed});
+  AnimationCreator({
+    this.onButtonPressed,
+    required this.name,
+    this.isDefault = false,
+    this.editing = false,
+  });
 }
 
 // This class is gonna be used for AnimationCreators, that are built up of primitives
 abstract class SegmentAnimationCreator extends AnimationCreator {
   List<Widget> children = [];
+
+  SegmentAnimationCreator(
+      {this.children = const [],
+      required super.name,
+      super.editing,
+      super.isDefault});
 
   @override
   Widget build() {
@@ -156,22 +186,41 @@ abstract class SegmentAnimationCreator extends AnimationCreator {
 }
 
 class FillEffectCreator extends SegmentAnimationCreator {
-  ValueWithDefault<double> duration = ValueWithDefault(0, isDefault: true);
-  ValueWithDefault<Color> color = ValueWithDefault(Colors.black);
-
-  FillEffectCreator({Function(AnimationCreator creator)? onButtonPressed}) {
+  FillEffectCreator(
+      {super.editing,
+      super.isDefault,
+      Function(AnimationCreator creator)? onButtonPressed})
+      : super(
+          name: 'Fill',
+        ) {
+    children = [
+      AnimationCreatorSlider(
+        currentValue: ValueWithDefault(
+          0,
+          isDefault: isDefault,
+          editing: editing,
+        ),
+        min: 0,
+        max: 1500,
+        name: 'Duration',
+      ),
+      AnimationCreatorColorWheel(
+        currentValue: ValueWithDefault(
+          Colors.black,
+          editing: editing,
+        ),
+        name: 'Color',
+      ),
+    ];
     super.onButtonPressed = onButtonPressed;
-    children.add(
-      AnimationCreatorColorWheel(currentValue: color),
-    );
   }
 
   @override
   Message send() {
     return FillEffectMessageBuilder(
       FillEffectMessage(
-        duration.value.toInt(),
-        color.value,
+        (children[0] as AnimationCreatorSlider).currentValue.value.toInt(),
+        (children[1] as AnimationCreatorColorWheel).currentValue.value,
       ),
     );
   }

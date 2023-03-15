@@ -1,29 +1,37 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 
-class PresetCreatorPopup extends StatelessWidget {
+class PresetCreatorPopup extends StatefulWidget {
   const PresetCreatorPopup({super.key});
+
+  @override
+  State<PresetCreatorPopup> createState() => _PresetCreatorPopupState();
+}
+
+class _PresetCreatorPopupState extends State<PresetCreatorPopup> {
+  String currentText = "";
 
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
       title: const Text('Save preset'),
-      content: const TextField(),
+      content: TextField(
+        onChanged: (value) {
+          currentText = value;
+        },
+      ),
       actions: [
         TextButton(
-          style: TextButton.styleFrom(
-            textStyle: Theme.of(context).textTheme.labelLarge,
-          ),
           child: const Text('Cancel'),
           onPressed: () {
             Navigator.of(context).pop();
           },
         ),
         TextButton(
-          style: TextButton.styleFrom(
-            textStyle: Theme.of(context).textTheme.labelLarge,
-          ),
           child: const Text('Save preset'),
           onPressed: () {
+            log(currentText);
             Navigator.of(context).pop();
           },
         ),
