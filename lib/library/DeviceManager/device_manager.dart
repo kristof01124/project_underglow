@@ -48,7 +48,7 @@ Map<IP, LedDeviceState> _deviceData = {
 class LedDeviceState {
   bool on;
   String animationName;
-  AnimationCreator? currentlyPlayingAnimation;
+  SimpleAnimationCreator? currentlyPlayingAnimation;
   int brightness;
 
   LedDeviceState({
@@ -67,7 +67,7 @@ class LedDeviceState {
 
 class SendableAnimation {
   final String name;
-  final AnimationCreator creator;
+  final SimpleAnimationCreator creator;
 
   SendableAnimation({required this.name, required this.creator});
 }
@@ -77,6 +77,18 @@ class Device {
   final String name;
   final IP ip;
   Device({required this.name, required this.ip, this.visible = false});
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is Device &&
+          runtimeType == other.runtimeType &&
+          visible == other.visible &&
+          name == other.name &&
+          ip == other.ip;
+
+  @override
+  int get hashCode => visible.hashCode ^ name.hashCode ^ ip.hashCode;
 }
 
 // THis class is gonna handle the stuff that all the Devices will need

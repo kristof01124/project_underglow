@@ -164,7 +164,7 @@ class AnimationCreatorColorWheel extends StatelessWidget {
 }
 
 class AnimationCreatorApplyButton extends StatelessWidget {
-  final AnimationCreator? creator;
+  final SimpleAnimationCreator? creator;
 
   const AnimationCreatorApplyButton({
     this.creator,
@@ -176,7 +176,7 @@ class AnimationCreatorApplyButton extends StatelessWidget {
     if (this.creator == null) {
       return Container();
     }
-    AnimationCreator creator = (this.creator as AnimationCreator);
+    SimpleAnimationCreator creator = (this.creator as SimpleAnimationCreator);
     return Column(
       children: [
         creator.build(),
@@ -191,36 +191,37 @@ class AnimationCreatorApplyButton extends StatelessWidget {
   }
 }
 
-abstract class AnimationCreator {
+/*
+  This class is gonna be used for simple animations, without a device connected.
+*/
+abstract class SimpleAnimationCreator {
   /*
     TODO: Get json representation
     Requirement: json handler implementation
   */
-  bool isDefault, editing;
+  bool editing;
 
   Widget build();
   Message send();
   String name;
 
-  Function(AnimationCreator)? onButtonPressed;
+  Function(SimpleAnimationCreator)? onButtonPressed;
 
-  AnimationCreator({
+  SimpleAnimationCreator({
     this.onButtonPressed,
     required this.name,
-    this.isDefault = false,
     this.editing = false,
   });
 }
 
 // This class is gonna be used for AnimationCreators, that are built up of primitives
-abstract class SegmentAnimationCreator extends AnimationCreator {
+abstract class SegmentAnimationCreator extends SimpleAnimationCreator {
   List<Widget> children = [];
 
   SegmentAnimationCreator(
       {this.children = const [],
       required super.name,
-      super.editing,
-      super.isDefault});
+      super.editing,});
 
   @override
   Widget build() {
@@ -233,8 +234,7 @@ abstract class SegmentAnimationCreator extends AnimationCreator {
 class FillEffectCreator extends SegmentAnimationCreator {
   FillEffectCreator({
     super.editing,
-    super.isDefault,
-    Function(AnimationCreator creator)? onButtonPressed,
+    Function(SimpleAnimationCreator creator)? onButtonPressed,
   }) : super(
           name: 'Fill',
         ) {

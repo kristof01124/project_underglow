@@ -19,7 +19,7 @@ class DetailedLedView extends StatefulWidget {
 
 class _DetailedLedViewState extends State<DetailedLedView> {
   String? value;
-  late Map<String, AnimationCreator> animations;
+  late Map<String, SimpleAnimationCreator> animations;
   AnimationCreatorApplyButton animationCreatorBody =
       const AnimationCreatorApplyButton();
 

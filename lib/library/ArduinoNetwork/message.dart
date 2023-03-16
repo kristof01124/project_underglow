@@ -4,6 +4,16 @@ class IP {
   final int entityIp; // unsigned16
 
   const IP(this.entityIp);
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is IP &&
+          runtimeType == other.runtimeType &&
+          entityIp == other.entityIp;
+
+  @override
+  int get hashCode => entityIp.hashCode;
 }
 
 class MessageType {
@@ -24,7 +34,8 @@ abstract class Message {
 abstract class MessageGenericType<T> extends Message {
   T value;
   late ByteData byteData;
-  late var creatorFunc, builderFunc;
+  late void Function(int, T) creatorFunc;
+  late T Function(int) builderFunc;
 
   MessageGenericType(this.value) {
     byteData = ByteData(size());
@@ -198,8 +209,7 @@ class MessageFloat64 extends MessageGenericType<double> {
   }
 }
 
-class PairMessage<A extends Message, B extends Message>
-    extends Message {
+class PairMessage<A extends Message, B extends Message> extends Message {
   A first;
   B second;
 
@@ -311,7 +321,7 @@ class MessageTypeMessageData extends SegmentMessage {
   MessageType get value => MessageType(
         (segments['main_type'] as MessageUint16).value,
         (segments['secondary_type'] as MessageUint16).value,
-  );
+      );
 }
 
 class MessageHeader extends SegmentMessage {
@@ -331,13 +341,14 @@ class MessageHeader extends SegmentMessage {
     add('time', MessageUint64(time));
     add('checksum', MessageUint8(checksum));
     add('sizeOfPayload', MessageUint16(sizeOfPayload));
-    add('numberOfHops',  MessageUint8(numberOfHops));
+    add('numberOfHops', MessageUint8(numberOfHops));
   }
 
   int get protocol => (segments['protocol'] as MessageUint8).value;
   IP get source => (segments['source'] as IpMessageData).value;
   IP get destination => (segments['destination'] as IpMessageData).value;
-  MessageType get messageType => (segments['messageType'] as MessageTypeMessageData).value;
+  MessageType get messageType =>
+      (segments['messageType'] as MessageTypeMessageData).value;
   int get time => (segments['time'] as MessageUint64).value;
   int get checksum => (segments['checksum'] as MessageUint8).value;
   int get sizeOfPayload => (segments['sizeOfPayload'] as MessageUint16).value;
@@ -351,6 +362,7 @@ class MessageHeader extends SegmentMessage {
     out -= checksum;
     return out;
   }
+
   bool check(int size) {
     if (size != sizeOfPayload + this.size()) {
       return false;
@@ -360,6 +372,7 @@ class MessageHeader extends SegmentMessage {
     }
     return true;
   }
+
   void setup(int sizeOfPayload) {
     segments['sizeOfPayload'] = MessageUint16(sizeOfPayload);
     segments['numberOfHops'] = MessageUint8(numberOfHops + 1);
@@ -372,13 +385,14 @@ class NetworkMessage<T extends Message> extends PairMessage<MessageHeader, T> {
   }
 
   void setup() {
-        first.setup(size());
-    }
+    first.setup(size());
+  }
 }
+
 class IndexedMessages<T extends Message> extends PairMessage<MessageUint16, T> {
-    IndexedMessages(int id, T value) : super(MessageUint16(id), value) {
-        first.value = id;
-    }
+  IndexedMessages(int id, T value) : super(MessageUint16(id), value) {
+    first.value = id;
+  }
 }
 
 class ListMessage extends PairMessage<MessageUint16, MessageArray> {
