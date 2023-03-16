@@ -19,29 +19,38 @@ class ValueWithDefault<T> {
 class _AnimationCreatorWrapperState extends State<AnimationCreatorWrapper> {
   @override
   Widget build(BuildContext context) {
-    if (!widget.value.editing) {
-      return widget.child;
+    Widget body = widget.child;
+    if (widget.value.editing) {
+      body = Row(
+        children: [
+          Expanded(
+            child: widget.child,
+          ),
+          Checkbox(
+            value: widget.value.isDefault,
+            onChanged: (checkboxValue) {
+              if (checkboxValue != null) {
+                setState(() {
+                  widget.value.isDefault = checkboxValue;
+                });
+              }
+            },
+          ),
+        ],
+      );
     }
     return Column(
       children: [
-        Text(widget.name),
-        Row(
-          children: [
-            Expanded(
-              child: widget.child,
+        Align(
+          alignment: Alignment.center,
+          child: Text(
+            '${widget.name}:',
+            style: const TextStyle(
+              fontSize: 30,
             ),
-            Checkbox(
-              value: widget.value.isDefault,
-              onChanged: (checkboxValue) {
-                if (checkboxValue != null) {
-                  setState(() {
-                    widget.value.isDefault = checkboxValue;
-                  });
-                }
-              },
-            ),
-          ],
+          ),
         ),
+        body,
       ],
     );
   }
@@ -62,6 +71,37 @@ class AnimationCreatorWrapper extends StatefulWidget {
   @override
   State<StatefulWidget> createState() {
     return _AnimationCreatorWrapperState();
+  }
+}
+
+class AnimationCreatorInputField extends StatelessWidget {
+  final ValueWithDefault<double> currentValue;
+  final String name;
+
+  const AnimationCreatorInputField({
+    super.key,
+    required this.currentValue,
+    required this.name,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    if (currentValue.isDefault) {
+      return const SizedBox.shrink();
+    }
+    return AnimationCreatorWrapper(
+        name: name,
+        value: currentValue,
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: TextField(
+            keyboardType: TextInputType.number,
+            onChanged: (value) {
+              // TODO: handle case when a non-number is inputted
+              currentValue.value = double.parse(value);
+            },
+          ),
+        ));
   }
 }
 
@@ -124,17 +164,22 @@ class AnimationCreatorColorWheel extends StatelessWidget {
 }
 
 class AnimationCreatorApplyButton extends StatelessWidget {
-  final AnimationCreator creator;
+  final AnimationCreator? creator;
 
-  const AnimationCreatorApplyButton(this.creator, {super.key});
+  const AnimationCreatorApplyButton({
+    this.creator,
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
+    if (this.creator == null) {
+      return Container();
+    }
+    AnimationCreator creator = (this.creator as AnimationCreator);
     return Column(
       children: [
-        Expanded(
-          child: creator.build(),
-        ),
+        creator.build(),
         TextButton(
           onPressed: () {
             creator.onButtonPressed?.call(creator);
@@ -186,22 +231,20 @@ abstract class SegmentAnimationCreator extends AnimationCreator {
 }
 
 class FillEffectCreator extends SegmentAnimationCreator {
-  FillEffectCreator(
-      {super.editing,
-      super.isDefault,
-      Function(AnimationCreator creator)? onButtonPressed})
-      : super(
+  FillEffectCreator({
+    super.editing,
+    super.isDefault,
+    Function(AnimationCreator creator)? onButtonPressed,
+  }) : super(
           name: 'Fill',
         ) {
     children = [
-      AnimationCreatorSlider(
+      AnimationCreatorInputField(
         currentValue: ValueWithDefault(
           0,
-          isDefault: isDefault,
           editing: editing,
+          isDefault: !editing,
         ),
-        min: 0,
-        max: 1500,
         name: 'Duration',
       ),
       AnimationCreatorColorWheel(
@@ -219,7 +262,7 @@ class FillEffectCreator extends SegmentAnimationCreator {
   Message send() {
     return FillEffectMessageBuilder(
       FillEffectMessage(
-        (children[0] as AnimationCreatorSlider).currentValue.value.toInt(),
+        (children[0] as AnimationCreatorInputField).currentValue.value.toInt(),
         (children[1] as AnimationCreatorColorWheel).currentValue.value,
       ),
     );

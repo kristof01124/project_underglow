@@ -10,8 +10,8 @@ import 'package:learning_dart/widgets/animation_creator.dart';
 import 'package:learning_dart/widgets/folded_header.dart';
 
 class DetailedLedView extends StatefulWidget {
-  const DetailedLedView({super.key, required this.device});
-  final Device device;
+  const DetailedLedView({super.key, required this.devices});
+  final List<Device> devices;
 
   @override
   State<DetailedLedView> createState() => _DetailedLedViewState();
@@ -20,50 +20,49 @@ class DetailedLedView extends StatefulWidget {
 class _DetailedLedViewState extends State<DetailedLedView> {
   String? value;
   late Map<String, AnimationCreator> animations;
-  Widget animationCreatorBody = Container();
+  AnimationCreatorApplyButton animationCreatorBody =
+      const AnimationCreatorApplyButton();
 
   @override
   void initState() {
     super.initState();
     // TODO: get tha available animations for the device
-    animations = {'Fill': FillEffectCreator(editing: true)};
+    animations = {'Fill': FillEffectCreator()};
   }
 
   @override
   Widget build(BuildContext context) {
-    return ListView(
-      children: [
-        const FoldedHeader(),
-        Align(
-          alignment: Alignment.centerLeft,
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(20, 20, 0, 0),
-            child: DropdownButton(
-              value: value,
-              items: animations.values
-                  .map((e) => DropdownMenuItem(
-                        value: e.name,
-                        child: Text(e.name),
-                      ))
-                  .toList(),
-              onChanged: (value) {
-                setState(() {
-                  this.value = value;
-                  animationCreatorBody =
-                      animations[value ?? '']?.build() ?? Container();
-                });
-              },
+    return Scaffold(
+      body: ListView(
+        children: [
+          const FoldedHeader(),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(20, 20, 0, 0),
+              child: DropdownButton(
+                value: value,
+                items: animations.values
+                    .map((e) => DropdownMenuItem(
+                          value: e.name,
+                          child: Text(e.name),
+                        ))
+                    .toList(),
+                onChanged: (value) {
+                  setState(() {
+                    this.value = value;
+                    log(value ?? '');
+                    animationCreatorBody = AnimationCreatorApplyButton(
+                      creator: animations[value ?? ''],
+                    );
+                  });
+                },
+              ),
             ),
           ),
-        ),
-        animationCreatorBody,
-        TextButton(
-          onPressed: () {
-            // TODO: send the animation to the device
-          },
-          child: const Text('Apply'),
-        )
-      ],
+          animationCreatorBody,
+        ],
+      ),
     );
   }
 }

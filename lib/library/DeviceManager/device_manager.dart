@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:learning_dart/library/Network/message_router.dart';
+import 'package:learning_dart/views/detailed_led_view/detailed_led_view.dart';
 import 'package:learning_dart/widgets/animation_creator.dart';
 
 import '../ArduinoNetwork/message.dart';
@@ -23,7 +24,14 @@ Map<IP, Device> _devices = {
   ),
 };
 Map<IP, Widget> _listView = {};
-Map<IP, Widget> _detailedView = {};
+Map<IP, Widget> _detailedView = {
+  underglowIp: DetailedLedView(
+    devices: [_devices[underglowIp] as Device],
+  ),
+  leftIndexIP: DetailedLedView(
+    devices: [_devices[leftIndexIP] as Device],
+  ),
+};
 Map<IP, LedDeviceState> _deviceData = {
   underglowIp: LedDeviceState(
     on: true,

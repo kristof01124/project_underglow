@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:learning_dart/library/DeviceManager/device_manager.dart';
+import 'package:learning_dart/views/detailed_led_view/detailed_led_view.dart';
+import 'package:learning_dart/views/preset_creator_view/preset_creator_view.dart';
 
 ButtonStyle ledDeviceOnStyle = TextButton.styleFrom(
   foregroundColor: Colors.black,
@@ -88,11 +90,9 @@ class _DeviceButtonState extends State<DeviceButton> {
         },
         onLongPress: () {
           if (widget.devices.length == 1) {
-            // get the detailed device view
-            // ignore: unused_local_variable
-            Widget detailedView =
-                DeviceManager.getDetailedView(widget.devices[0]);
-            // TODO: then navigate to it
+            Navigator.of(context).push(MaterialPageRoute(builder: (context) {
+              return DeviceManager.getDetailedView(widget.devices[0]);
+            }));
           }
         },
         style: style,

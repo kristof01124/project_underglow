@@ -4,6 +4,8 @@ import 'package:learning_dart/library/PresetManager/preset_manager.dart';
 import 'package:learning_dart/views/main_view/device_button.dart';
 import 'package:learning_dart/views/main_view/main_view_header.dart';
 import 'package:learning_dart/views/main_view/preset_button.dart';
+import 'package:learning_dart/views/preset_creator_view/preset_creator_view.dart';
+import 'package:learning_dart/views/preset_list_view/preset_list_view.dart';
 import 'package:learning_dart/widgets/columns.dart';
 
 // PARAMETERS
@@ -33,9 +35,14 @@ const textStyleRight = TextStyle(
 const deviceButtonPadding = EdgeInsets.all(5.0);
 const titlePadding = EdgeInsets.symmetric(horizontal: 8);
 
-class MainView extends StatelessWidget {
+class MainView extends StatefulWidget {
   const MainView({super.key});
 
+  @override
+  State<MainView> createState() => _MainViewState();
+}
+
+class _MainViewState extends State<MainView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -55,6 +62,7 @@ class MainView extends StatelessWidget {
               ],
             ),
           ),
+          // PRESETS--------------------------------------------------------------------
           SliverToBoxAdapter(
             child: Padding(
               padding: titlePadding,
@@ -71,7 +79,15 @@ class MainView extends StatelessWidget {
                     child: Align(
                       alignment: Alignment.centerRight,
                       child: TextButton(
-                        onPressed: () {},
+                        onPressed: () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (context) {
+                                return const PresetListView();
+                              },
+                            ),
+                          );
+                        },
                         child: const Text(
                           'More',
                           style: textStyleRight,
@@ -85,19 +101,19 @@ class MainView extends StatelessWidget {
           ),
           SliverToBoxAdapter(
             child: SizedBox(
-              child: Columns(
-                numberOfColumns: 2,
-                children: PresetManager.menuPresets
-                    .map(
-                      (e) => Padding(
-                        padding: deviceButtonPadding,
-                        child: PresetButton(presetName: e),
-                      ),
-                    )
-                    .toList(),
-              ),
+              child: Columns(numberOfColumns: 2, children: [
+                for (int i = 0; i < PresetManager.menuPresets.length; i++)
+                  Padding(
+                    padding: deviceButtonPadding,
+                    child: PresetButton(
+                      presetButtonIndex: i,
+                      mainViewState: this,
+                    ),
+                  )
+              ]),
             ),
           ),
+          // DEVICES ---------------------------------------------------------------------------
           SliverToBoxAdapter(
             child: Padding(
               padding: titlePadding,
@@ -114,7 +130,15 @@ class MainView extends StatelessWidget {
                     child: Align(
                       alignment: Alignment.centerRight,
                       child: TextButton(
-                        onPressed: () {},
+                        onPressed: () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (context) {
+                                return const PresetCreatorView();
+                              },
+                            ),
+                          );
+                        },
                         child: const Text(
                           'More',
                           style: textStyleRight,

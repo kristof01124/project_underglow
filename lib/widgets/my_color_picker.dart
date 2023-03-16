@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:learning_dart/widgets/columns.dart';
@@ -85,7 +87,7 @@ class _MyColorPickerState extends State<MyColorPicker> {
               horizontal: height / 20,
             ),
             child: SizedBox(
-              height: height * 7 / 10,
+              height: min(width, height * 7 / 10),
               width: width,
               child: ColorPickerArea(
                 color.withValue(1.0),

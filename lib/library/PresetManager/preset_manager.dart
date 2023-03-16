@@ -6,7 +6,12 @@ import '../ArduinoNetwork/message.dart';
 const String defaultPresetName = '[None]';
 
 class PresetManager extends NetworkEntity {
-  static Map<String, List<Message>> presets = {};
+  static Map<String, List<Message>> presets = {
+    'Fill': [],
+    'Rgb wave': [],
+    'Somethin': [],
+    'I guess': [],
+  };
   static PresetManager instance = PresetManager();
   static List<String> menuPresets = [
     for (int i = 0; i < 6; i++) defaultPresetName
