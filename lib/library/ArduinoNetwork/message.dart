@@ -16,6 +16,23 @@ class IP {
   int get hashCode => entityIp.hashCode;
 }
 
+class EmptyMessage extends Message {
+  @override
+  void build(List<int> buffer) {
+    // Do nothing
+  }
+
+  @override
+  List<int> buildBuffer() {
+    return [];
+  }
+
+  @override
+  int size() {
+    return 0;
+  }
+}
+
 class MessageType {
   final int mainType, secondaryType; // unsigned16
 

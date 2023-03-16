@@ -181,9 +181,7 @@ class AnimationCreatorApplyButton extends StatelessWidget {
       children: [
         creator.build(),
         TextButton(
-          onPressed: () {
-            creator.onButtonPressed?.call(creator);
-          },
+          onPressed: () {},
           child: const Text('Apply'),
         ),
       ],
@@ -205,10 +203,7 @@ abstract class SimpleAnimationCreator {
   Message send();
   String name;
 
-  Function(SimpleAnimationCreator)? onButtonPressed;
-
   SimpleAnimationCreator({
-    this.onButtonPressed,
     required this.name,
     this.editing = false,
   });
@@ -218,10 +213,11 @@ abstract class SimpleAnimationCreator {
 abstract class SegmentAnimationCreator extends SimpleAnimationCreator {
   List<Widget> children = [];
 
-  SegmentAnimationCreator(
-      {this.children = const [],
-      required super.name,
-      super.editing,});
+  SegmentAnimationCreator({
+    this.children = const [],
+    required super.name,
+    super.editing,
+  });
 
   @override
   Widget build() {
@@ -255,7 +251,6 @@ class FillEffectCreator extends SegmentAnimationCreator {
         name: 'Color',
       ),
     ];
-    super.onButtonPressed = onButtonPressed;
   }
 
   @override
