@@ -4,7 +4,7 @@ import 'package:flutter/src/widgets/placeholder.dart';
 import 'package:learning_dart/widgets/animation_creator.dart';
 
 class AnimationButton extends StatefulWidget {
-  final AnimationCreator animationCreator;
+  final SimpleAnimationCreator animationCreator;
 
   const AnimationButton({super.key, required this.animationCreator});
 
