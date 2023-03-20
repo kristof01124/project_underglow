@@ -1,19 +1,25 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
-import 'package:flutter_colorpicker/flutter_colorpicker.dart';
-import 'package:learning_dart/library/ArduinoNetwork/animation_message.dart';
-import 'package:learning_dart/library/ArduinoNetwork/message.dart';
 import 'package:learning_dart/widgets/stateful_slider.dart';
 
+import '../library/AnimationCreator/single_animation_creator.dart';
 import 'my_color_picker.dart';
 
-class ValueWithDefault<T> {
-  T value;
-  bool isDefault;
-  bool editing;
+class AnimationCreatorWrapper extends StatefulWidget {
+  final Widget child;
+  final ValueWithDefault value;
+  final String name;
 
-  ValueWithDefault(this.value, {this.isDefault = false, this.editing = false});
+  const AnimationCreatorWrapper({
+    super.key,
+    required this.child,
+    required this.value,
+    required this.name,
+  });
+
+  @override
+  State<StatefulWidget> createState() {
+    return _AnimationCreatorWrapperState();
+  }
 }
 
 class _AnimationCreatorWrapperState extends State<AnimationCreatorWrapper> {
@@ -53,24 +59,6 @@ class _AnimationCreatorWrapperState extends State<AnimationCreatorWrapper> {
         body,
       ],
     );
-  }
-}
-
-class AnimationCreatorWrapper extends StatefulWidget {
-  final Widget child;
-  final ValueWithDefault value;
-  final String name;
-
-  const AnimationCreatorWrapper({
-    super.key,
-    required this.child,
-    required this.value,
-    required this.name,
-  });
-
-  @override
-  State<StatefulWidget> createState() {
-    return _AnimationCreatorWrapperState();
   }
 }
 
@@ -158,107 +146,6 @@ class AnimationCreatorColorWheel extends StatelessWidget {
         onColorChanged: (color) {
           currentValue.value = color;
         },
-      ),
-    );
-  }
-}
-
-class AnimationCreatorApplyButton extends StatelessWidget {
-  final SimpleAnimationCreator? creator;
-
-  const AnimationCreatorApplyButton({
-    this.creator,
-    super.key,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    if (this.creator == null) {
-      return Container();
-    }
-    SimpleAnimationCreator creator = (this.creator as SimpleAnimationCreator);
-    return Column(
-      children: [
-        creator.build(),
-        TextButton(
-          onPressed: () {},
-          child: const Text('Apply'),
-        ),
-      ],
-    );
-  }
-}
-
-/*
-  This class is gonna be used for simple animations, without a device connected.
-*/
-abstract class SimpleAnimationCreator {
-  /*
-    TODO: Get json representation
-    Requirement: json handler implementation
-  */
-  bool editing;
-
-  Widget build();
-  Message send();
-  String name;
-
-  SimpleAnimationCreator({
-    required this.name,
-    this.editing = false,
-  });
-}
-
-// This class is gonna be used for AnimationCreators, that are built up of primitives
-abstract class SegmentAnimationCreator extends SimpleAnimationCreator {
-  List<Widget> children = [];
-
-  SegmentAnimationCreator({
-    this.children = const [],
-    required super.name,
-    super.editing,
-  });
-
-  @override
-  Widget build() {
-    return Column(
-      children: children,
-    );
-  }
-}
-
-class FillEffectCreator extends SegmentAnimationCreator {
-  FillEffectCreator({
-    super.editing,
-    Function(SimpleAnimationCreator creator)? onButtonPressed,
-  }) : super(
-          name: 'Fill',
-        ) {
-    children = [
-      AnimationCreatorInputField(
-        currentValue: ValueWithDefault(
-          0,
-          editing: editing,
-          isDefault: !editing,
-        ),
-        name: 'Duration',
-      ),
-      AnimationCreatorColorWheel(
-        currentValue: ValueWithDefault(
-          Colors.black,
-          editing: editing,
-        ),
-        name: 'Color',
-      ),
-    ];
-  }
-
-  @override
-  Message send() {
-    return FillEffectMessageBuilder(
-      FillEffectMessage(
-        (children[0] as AnimationCreatorInputField).currentValue.value.toInt(),
-        (children[1] as AnimationCreatorColorWheel).currentValue.value,
       ),
     );
   }

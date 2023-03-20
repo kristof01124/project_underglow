@@ -1,12 +1,9 @@
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/src/widgets/framework.dart';
-import 'package:flutter/src/widgets/placeholder.dart';
+import 'package:learning_dart/library/AnimationCreator/animation_creator_implementations.dart';
 import 'package:learning_dart/library/DeviceManager/device_manager.dart';
-import 'package:learning_dart/views/detailed_led_view/animation_button.dart';
-import 'package:learning_dart/views/main_view/main_view_header.dart';
-import 'package:learning_dart/widgets/animation_creator.dart';
+import 'package:learning_dart/library/AnimationCreator/single_animation_creator.dart';
 import 'package:learning_dart/widgets/folded_header.dart';
 
 class DetailedLedView extends StatefulWidget {
@@ -19,9 +16,8 @@ class DetailedLedView extends StatefulWidget {
 
 class _DetailedLedViewState extends State<DetailedLedView> {
   String? value;
-  late Map<String, SimpleAnimationCreator> animations;
-  AnimationCreatorApplyButton animationCreatorBody =
-      const AnimationCreatorApplyButton();
+  late Map<String, SingleAnimationCreator> animations;
+  SingleAnimationCreator? animationCreatorBody;
 
   @override
   void initState() {
@@ -52,15 +48,13 @@ class _DetailedLedViewState extends State<DetailedLedView> {
                   setState(() {
                     this.value = value;
                     log(value ?? '');
-                    animationCreatorBody = AnimationCreatorApplyButton(
-                      creator: animations[value ?? ''],
-                    );
+                    animationCreatorBody = animations[value ?? ''];
                   });
                 },
               ),
             ),
           ),
-          animationCreatorBody,
+          animationCreatorBody?.build() ?? Container(),
         ],
       ),
     );
