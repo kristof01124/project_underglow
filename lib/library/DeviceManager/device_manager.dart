@@ -142,7 +142,7 @@ class DeviceManager {
 /*
   This class is gonna hold the available main animatins for a given Led.
 */
-class MainAnimationManager {
+class AnimationManager {
   static List<SendableAnimation> getAnimationsForDevice(Device device) {
     // TODO
     return [];

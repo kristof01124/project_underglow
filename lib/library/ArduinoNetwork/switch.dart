@@ -39,8 +39,8 @@ class Switch extends NetworkEntity {
     }
     currentlyWriting = true;
     while (available() != 0) {
-        sendOneMessage(messages.removeFirst());
-        await Future.delayed(Duration.zero);
+      sendOneMessage(messages.removeFirst());
+      await Future.delayed(Duration.zero);
     }
     currentlyWriting = false;
   }
@@ -130,7 +130,7 @@ class Switch extends NetworkEntity {
   }
 
   bool reading() {
-    return true; // TODO
+    return true; // TODO: not used nor is important
   }
 
   bool writing() {
@@ -147,11 +147,13 @@ class Switch extends NetworkEntity {
     clear();
   }
 
+  @override
   void handleMessage(List<int> buffer, NetworkEntity src) {
     messages.add(buffer);
     sendMessages();
   }
 
+  @override
   void handle() {
     int time = DateTime.now().millisecondsSinceEpoch;
     if (disabled) {
@@ -169,7 +171,7 @@ class Switch extends NetworkEntity {
     MessageHeader msg = MessageHeader();
     msg.build(currentBuffer);
     if (msg.check(currentBuffer.length)) {
-        NetworkManager.handleMessage(currentBuffer, this);
+      NetworkManager.handleMessage(currentBuffer, this);
     }
     clear();
   }
