@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:learning_dart/library/ArduinoNetwork/animation_message.dart';
+import 'package:learning_dart/library/ArduinoNetwork/message.dart';
 import 'package:learning_dart/widgets/stateful_slider.dart';
-
-import '../library/AnimationCreator/single_animation_creator.dart';
 import 'my_color_picker.dart';
 
 class AnimationCreatorWrapper extends StatefulWidget {
