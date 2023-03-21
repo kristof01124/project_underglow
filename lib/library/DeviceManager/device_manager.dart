@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:learning_dart/library/Network/message_router.dart';
 import 'package:learning_dart/views/detailed_led_view/detailed_led_view.dart';
-import 'package:learning_dart/widgets/animation_creator.dart';
+import 'package:learning_dart/library/AnimationCreator/single_animation_creator.dart';
 
 import '../ArduinoNetwork/message.dart';
 
@@ -48,7 +48,7 @@ Map<IP, LedDeviceState> _deviceData = {
 class LedDeviceState {
   bool on;
   String animationName;
-  SimpleAnimationCreator? currentlyPlayingAnimation;
+  SingleAnimationCreator? currentlyPlayingAnimation;
   int brightness;
 
   LedDeviceState({
@@ -67,7 +67,7 @@ class LedDeviceState {
 
 class SendableAnimation {
   final String name;
-  final SimpleAnimationCreator creator;
+  final SingleAnimationCreator creator;
 
   SendableAnimation({required this.name, required this.creator});
 }
