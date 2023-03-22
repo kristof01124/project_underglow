@@ -83,7 +83,7 @@ class _AnimationCreatorDevicePickerState
           onConfirm: (devices) {
             setState(() {
               widget.animationPicker.devices = devices;
-              // TODO: update the animations for the animation picker
+              // TODO: Update the animations for the animation picker
             });
           },
         ),
