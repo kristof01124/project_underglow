@@ -14,7 +14,9 @@ class AnimationCreatorWithDevices {
       required this.availableDevices,
       List<Device> devices = const []})
       : animationPicker = AnimationPicker(
-          getAnimations: () => [ FillEffectCreator()],
+          animations: [
+            FillEffectCreator(),
+          ],
           devices: devices,
           editing: editing,
         );
@@ -81,6 +83,7 @@ class _AnimationCreatorDevicePickerState
           onConfirm: (devices) {
             setState(() {
               widget.animationPicker.devices = devices;
+              // TODO: update the animations for the animation picker
             });
           },
         ),

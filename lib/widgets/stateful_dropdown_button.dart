@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 class StatefulDropdownButton extends StatefulWidget {
   final List<DropdownMenuItem<dynamic>> items;
-  final dynamic value;
   final Widget? hint;
   final Widget? disabledHint;
   final ValueChanged<dynamic>? onChanged;
@@ -12,6 +11,7 @@ class StatefulDropdownButton extends StatefulWidget {
   final bool isDense;
   final bool isExpanded;
   final TextStyle? style;
+  final dynamic value;
 
   const StatefulDropdownButton({
     super.key,
@@ -33,9 +33,18 @@ class StatefulDropdownButton extends StatefulWidget {
 }
 
 class _StatefulDropdownButtonState extends State<StatefulDropdownButton> {
+  dynamic value;
+
+  @override
+  void initState() {
+    super.initState();
+    value = widget.value;
+  }
+
   @override
   Widget build(BuildContext context) {
     return DropdownButton(
+      value: value,
       key: widget.key,
       hint: widget.hint,
       disabledHint: widget.disabledHint,
@@ -43,6 +52,7 @@ class _StatefulDropdownButtonState extends State<StatefulDropdownButton> {
       onChanged: (value) {
         setState(
           () {
+            this.value = value;
             widget.onChanged?.call(value);
           },
         );
