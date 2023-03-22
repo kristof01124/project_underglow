@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:learning_dart/library/AnimationCreator/animation_creator_animation_picker.dart';
+import 'package:learning_dart/library/AnimationCreator/animation_creator_implementations.dart';
 import 'package:learning_dart/library/ArduinoNetwork/message.dart';
 import 'package:learning_dart/library/DeviceManager/device_manager.dart';
 import 'package:learning_dart/library/AnimationCreator/single_animation_creator.dart';
@@ -12,7 +13,11 @@ class AnimationCreatorWithDevices {
       this.editing = false,
       required this.availableDevices,
       List<Device> devices = const []})
-      : animationPicker = AnimationPicker(devices: devices, editing: editing);
+      : animationPicker = AnimationPicker(
+          getAnimations: () => [ FillEffectCreator()],
+          devices: devices,
+          editing: editing,
+        );
 
   List<Device> availableDevices;
 
@@ -63,7 +68,7 @@ class _AnimationCreatorDevicePickerState
     if (!widget.animationPicker.editing) {
       return widget.animationPicker.build();
     }
-    return Column(
+    return ListView(
       children: [
         MultiSelectDialogField(
           items: [
