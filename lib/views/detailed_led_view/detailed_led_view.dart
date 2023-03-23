@@ -22,7 +22,7 @@ class _DetailedLedViewState extends State<DetailedLedView> {
   @override
   void initState() {
     super.initState();
-    // TODO: get tha available animations for the device
+    // TODO: Get the available animations for the device
     animations = {'Fill': FillEffectCreator()};
   }
 

@@ -130,7 +130,7 @@ class Switch extends NetworkEntity {
   }
 
   bool reading() {
-    return true; // TODO: not used nor is important
+    return true; // Not used nor is important
   }
 
   bool writing() {

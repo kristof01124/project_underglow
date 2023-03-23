@@ -150,13 +150,3 @@ class DeviceManager {
     return device.ip.entityIp >= 128 && device.ip.entityIp < 256;
   }
 }
-
-/*
-  This class is gonna hold the available main animatins for a given Led.
-*/
-class AnimationManager {
-  static List<SendableAnimation> getAnimationsForDevice(Device device) {
-    // TODO
-    return [];
-  }
-}

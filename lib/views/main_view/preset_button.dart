@@ -34,6 +34,7 @@ class PresetButton extends StatelessWidget {
     )
         .then(
       (value) {
+        // ignore: invalid_use_of_protected_member
         mainViewState.setState(
           () {
             log(PresetManager.menuPresets.toString());

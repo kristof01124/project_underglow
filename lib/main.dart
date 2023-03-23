@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:learning_dart/library/AnimationCreator/animation_creator_with_device.dart';
 import 'package:learning_dart/library/DeviceManager/device_manager.dart';
-import 'package:learning_dart/views/main_view/main_view.dart';
 
 var espMacAddress = "78:21:84:92:49:1E";
 

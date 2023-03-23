@@ -3,7 +3,6 @@ import 'package:learning_dart/library/AnimationCreator/animation_creator_animati
 import 'package:learning_dart/library/AnimationCreator/animation_creator_implementations.dart';
 import 'package:learning_dart/library/ArduinoNetwork/message.dart';
 import 'package:learning_dart/library/DeviceManager/device_manager.dart';
-import 'package:learning_dart/library/AnimationCreator/single_animation_creator.dart';
 import 'package:multi_select_flutter/dialog/multi_select_dialog_field.dart';
 import 'package:multi_select_flutter/util/multi_select_item.dart';
 
@@ -83,7 +82,6 @@ class _AnimationCreatorDevicePickerState
           onConfirm: (devices) {
             setState(() {
               widget.animationPicker.devices = devices;
-              // TODO: update the animations for the animation picker
             });
           },
         ),
