@@ -27,16 +27,13 @@ class MeRUpdateMessage extends NetworkMessage<ListMessage> {
   MeRUpdateMessage()
       : super(
             MessageHeader(
-              NetworkManager.protocol,
-              MessageRouter.messageRouterIp,
-              MessageRouter.messageRouterIp,
-              const MessageType(
+              protocol: NetworkManager.protocol,
+              source: MessageRouter.messageRouterIp,
+              destination: MessageRouter.messageRouterIp,
+              messageType: const MessageType(
                 MessageRouter.messagePrimaryType,
                 MessageRouter.updateMessageSecondaryType,
               ),
-              0,
-              0,
-              0,
             ),
             ListMessage(
               (int size) => List.filled(size, MessageRouterRecordUpdate()),
@@ -62,11 +59,12 @@ class MessageRouter extends NetworkEntity {
 
   void sendUpdateMessageChanged(Map<IP, MessageRouterRecord> changed) {
     if (changed.isEmpty) {
-        return;
+      return;
     }
     MeRUpdateMessage update = MeRUpdateMessage();
     for (var element in changed.values) {
-        update.second.data.add(MessageRouterRecordUpdate(element.ipOfDevice, element.numberOfHops + 1));
+      update.second.data.add(MessageRouterRecordUpdate(
+          element.ipOfDevice, element.numberOfHops + 1));
     }
     NetworkManager.handleMessage(update.buildBuffer(), this);
   }
@@ -75,26 +73,26 @@ class MessageRouter extends NetworkEntity {
     int time = DateTime.now().millisecondsSinceEpoch;
     Map<IP, MessageRouterRecord> changed = {};
     for (var element in msg.second.data) {
-        var record = (element as MessageRouterRecordUpdate);
-        MessageRouterRecord newRecord = MessageRouterRecord(record.ipOfDevice, record.numberOfHops, time, src);
-        if (foundBetterDestinationEntity(newRecord)) {
-          advertisedRecords[record.ipOfDevice] = newRecord;
-          changed[record.ipOfDevice] = newRecord;
-        }
-        
+      var record = (element as MessageRouterRecordUpdate);
+      MessageRouterRecord newRecord = MessageRouterRecord(
+          record.ipOfDevice, record.numberOfHops, time, src);
+      if (foundBetterDestinationEntity(newRecord)) {
+        advertisedRecords[record.ipOfDevice] = newRecord;
+        changed[record.ipOfDevice] = newRecord;
+      }
     }
     if (changed.isEmpty) {
-        return;
+      return;
     }
     sendUpdateMessageChanged(changed);
   }
 
   void broadcastMessage(List<int> buffer, NetworkEntity src) {
     for (var element in advertisedRecords.values) {
-        sendLocal(element, buffer, src);
+      sendLocal(element, buffer, src);
     }
     for (var element in notAdvertisedRecords) {
-        sendLocal(element, buffer, src);
+      sendLocal(element, buffer, src);
     }
   }
 
@@ -106,12 +104,12 @@ class MessageRouter extends NetworkEntity {
       return true;
     }
     for (var element in notAdvertisedRecords) {
-            if (element.ipOfDevice.entityIp == value.entityIp) {
-                return true;
-                  }
-        }
-    return false;
+      if (element.ipOfDevice.entityIp == value.entityIp) {
+        return true;
+      }
     }
+    return false;
+  }
 
   static MessageRouterRecord findRecord(IP value) {
     var element = advertisedRecords[value];
@@ -119,9 +117,9 @@ class MessageRouter extends NetworkEntity {
       return element;
     }
     for (var element in notAdvertisedRecords) {
-            if (element.ipOfDevice.entityIp == value.entityIp) {
-                return element;
-        }
+      if (element.ipOfDevice.entityIp == value.entityIp) {
+        return element;
+      }
     }
     throw Exception();
   }
@@ -141,32 +139,35 @@ class MessageRouter extends NetworkEntity {
 
   static void pruneInactiveRecords() {
     if (timeoutTime == 0) {
-        return;
+      return;
     }
     List<IP> shouldBeDeleted = [];
     int time = DateTime.now().millisecondsSinceEpoch;
     for (var element in advertisedRecords.entries) {
-        if (element.value.lastUpdate + timeoutTime < time) {
-            shouldBeDeleted.add(element.key);
-        }
+      if (element.value.lastUpdate + timeoutTime < time) {
+        shouldBeDeleted.add(element.key);
+      }
     }
     for (var key in shouldBeDeleted) {
-        advertisedRecords.remove(key);
+      advertisedRecords.remove(key);
     }
   }
+
   static void reinforceRecord(MessageHeader header, NetworkEntity src) {
     int time = DateTime.now().millisecondsSinceEpoch;
     if (advertisedRecords[header.source] != null) {
-        MessageRouterRecord record = (advertisedRecords[header.source] as MessageRouterRecord);
-        if (record.destinationEntity == src) {
-            record.lastUpdate = time;
-        }
+      MessageRouterRecord record =
+          (advertisedRecords[header.source] as MessageRouterRecord);
+      if (record.destinationEntity == src) {
+        record.lastUpdate = time;
+      }
     }
   }
 
   static bool foundBetterDestinationEntity(MessageRouterRecord newValue) {
     if (advertisedRecords[newValue.ipOfDevice] != null) {
-        return ((advertisedRecords[newValue.ipOfDevice])?.numberOfHops ?? 0) > newValue.numberOfHops;
+      return ((advertisedRecords[newValue.ipOfDevice])?.numberOfHops ?? 0) >
+          newValue.numberOfHops;
     }
     return true;
   }
@@ -176,17 +177,17 @@ class MessageRouter extends NetworkEntity {
     MessageHeader msg = MessageHeader();
     msg.build(buffer);
     if (msg.destination == broadcastIP) {
-        broadcastMessage(buffer, src);
+      broadcastMessage(buffer, src);
     } else {
-        if (!containsRecord(msg.destination)) {
-            return;
-        }
-        var element = findRecord(msg.destination);
-        if (element.destinationEntity == src) {
-            broadcastMessage(buffer, src);
-            return;
-        }
-        element.destinationEntity.handleMessage(buffer, src);
+      if (!containsRecord(msg.destination)) {
+        return;
+      }
+      var element = findRecord(msg.destination);
+      if (element.destinationEntity == src) {
+        broadcastMessage(buffer, src);
+        return;
+      }
+      element.destinationEntity.handleMessage(buffer, src);
     }
   }
 
@@ -204,7 +205,7 @@ class MessageRouter extends NetworkEntity {
     advertisedRecords.clear();
     notAdvertisedRecords.clear();
     for (NetworkEntity entity in NetworkManager.entities) {
-        addEntity(entity);
+      addEntity(entity);
     }
     sendUpdateMessage();
   }
@@ -214,9 +215,11 @@ class MessageRouter extends NetworkEntity {
 
   static void addEntity(NetworkEntity entity) {
     if (entity.advertised()) {
-        advertisedRecords[entity.getIp()] = MessageRouterRecord(entity.getIp(), 0, 0, entity);
+      advertisedRecords[entity.getIp()] =
+          MessageRouterRecord(entity.getIp(), 0, 0, entity);
     } else {
-        notAdvertisedRecords.add(MessageRouterRecord(entity.getIp(), 0, 0, entity));
+      notAdvertisedRecords
+          .add(MessageRouterRecord(entity.getIp(), 0, 0, entity));
     }
   }
 }
