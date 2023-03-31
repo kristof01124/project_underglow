@@ -30,13 +30,11 @@ class PresetManager extends NetworkEntity {
     }
   }
 
+  // These functions don't need to be ovewritten, the only reason the PresetManager
+  // needs to inherit from networkentity is to send messages
   @override
-  void handle() {
-    // TODO: implement handle
-  }
+  void handle() {}
 
   @override
-  void handleMessage(List<int> buffer, NetworkEntity src) {
-    // TODO: implement handleMessage
-  }
+  void handleMessage(List<int> buffer, NetworkEntity src) {}
 }

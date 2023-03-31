@@ -342,15 +342,16 @@ class MessageTypeMessageData extends SegmentMessage {
 }
 
 class MessageHeader extends SegmentMessage {
-  MessageHeader(
-      [int protocol = 0,
-      IP source = const IP(0),
-      IP destination = const IP(0),
-      MessageType messageType = const MessageType(0, 0),
-      int time = 0,
-      int checksum = 0,
-      int sizeOfPayload = 0,
-      int numberOfHops = 0]) {
+  MessageHeader({
+    int protocol = 0,
+    IP source = const IP(0),
+    IP destination = const IP(0),
+    MessageType messageType = const MessageType(0, 0),
+    int time = 0,
+    int checksum = 0,
+    int sizeOfPayload = 0,
+    int numberOfHops = 0,
+  }) {
     add('protocol', MessageUint8(protocol));
     add('source', IpMessageData(source));
     add('destination', IpMessageData(destination));

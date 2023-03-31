@@ -53,20 +53,20 @@ class SamplePage extends StatelessWidget {
                       collapseMode: CollapseMode.pin,
                       centerTitle: false,
                       titlePadding:
-                          EdgeInsets.symmetric(vertical: 16, horizontal: 0),
+                          const EdgeInsets.symmetric(vertical: 16, horizontal: 0),
                       title: ValueListenableBuilder(
                         valueListenable: _titlePaddingNotifier,
                         builder: (context, value, child) {
                           return Padding(
                             padding: EdgeInsets.symmetric(horizontal: value),
-                            child: Text("Title"),
+                            child: const Text("Title"),
                           );
                         },
                       ),
                       background: Container(color: Colors.green))),
             ];
           },
-          body: Text("Body text")),
+          body: const Text("Body text")),
     );
   }
 }

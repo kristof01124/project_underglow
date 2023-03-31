@@ -42,7 +42,7 @@ class _PresetListButtonState extends State<PresetListButton> {
             Navigator.of(context).pop();
           },
           onLongPress: () {
-            // TODO: popup
+            // TODO: Popup for deletion of the given preset
           },
           child: Text(presetName),
         ),

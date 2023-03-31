@@ -7,14 +7,13 @@ class MainViewHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    double width = MediaQuery.of(context).size.width;
     return SliverAppBar(
       pinned: true,
       expandedHeight: MediaQuery.of(context).size.height / 2,
       collapsedHeight: MediaQuery.of(context).size.height / 10,
       flexibleSpace: FlexibleSpaceBar(
         expandedTitleScale: 1,
-        titlePadding: EdgeInsets.all(5),
+        titlePadding: const EdgeInsets.all(5),
         title: Center(
           child: Image.file(
             File('C:\\Users\\krist\\Downloads\\Project_Underlow_logo.png'),
