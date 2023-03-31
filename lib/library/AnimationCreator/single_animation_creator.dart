@@ -9,7 +9,7 @@ class ValueWithDefault<T> {
   ValueWithDefault(this.value, {this.isDefault = false, this.editing = false});
 }
 
-abstract class SingleAnimationCreator {
+abstract class SimpleAnimationCreator {
   /*
     TODO: Get json representation
     Requirement: json handler implementation
@@ -20,14 +20,14 @@ abstract class SingleAnimationCreator {
   Message send();
   String name;
 
-  SingleAnimationCreator({
+  SimpleAnimationCreator({
     required this.name,
     this.editing = false,
   });
 }
 
 // This class is gonna be used for AnimationCreators, that are built up of primitives
-abstract class SegmentAnimationCreator extends SingleAnimationCreator {
+abstract class SegmentAnimationCreator extends SimpleAnimationCreator {
   List<Widget> children = [];
 
   SegmentAnimationCreator({

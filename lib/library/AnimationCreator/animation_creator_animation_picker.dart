@@ -12,8 +12,8 @@ import '../DeviceManager/device_manager.dart';
 class AnimationPicker {
   List<Device> devices;
   bool editing;
-  SingleAnimationCreator? animation;
-  final List<SingleAnimationCreator> animations;
+  SimpleAnimationCreator? animation;
+  final List<SimpleAnimationCreator> animations;
 
   void setDevices(List<Device> devices) {
     this.devices = devices;
@@ -26,10 +26,6 @@ class AnimationPicker {
   });
 
   Widget build() {
-    if (animation != null) {
-      return animation?.build() ?? Container();
-    }
-
     return AnimationPickerWidget(animationPicker: this);
   }
 }
@@ -47,20 +43,27 @@ class _AnimationPickerWidgetState extends State<AnimationPickerWidget> {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        DropdownButton(
-          value: widget.animationPicker.animation,
-          onChanged: (value) {
-            setState(
-              () {
-                widget.animationPicker.animation = value;
+        Align(
+          alignment: Alignment.centerLeft,
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: DropdownButton(
+              value: widget.animationPicker.animation,
+              onChanged: (value) {
+                setState(
+                  () {
+                    widget.animationPicker.animation = value;
+                  },
+                );
               },
-            );
-          },
-          items: [
-            for (SingleAnimationCreator animation
-                in widget.animationPicker.animations)
-              DropdownMenuItem(value: animation, child: Text(animation.name))
-          ],
+              items: [
+                for (SimpleAnimationCreator animation
+                    in widget.animationPicker.animations)
+                  DropdownMenuItem(
+                      value: animation, child: Text(animation.name))
+              ],
+            ),
+          ),
         ),
         widget.animationPicker.animation?.build() ?? Container(),
       ],

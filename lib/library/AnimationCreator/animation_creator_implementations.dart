@@ -7,7 +7,7 @@ import 'package:learning_dart/library/AnimationCreator/single_animation_creator.
 class FillEffectCreator extends SegmentAnimationCreator {
   FillEffectCreator({
     super.editing,
-    Function(SingleAnimationCreator creator)? onButtonPressed,
+    Function(SimpleAnimationCreator creator)? onButtonPressed,
     double? duration,
     Color? color,
   }) : super(

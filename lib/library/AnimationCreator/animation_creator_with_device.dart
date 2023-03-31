@@ -15,7 +15,7 @@ class AnimationCreatorWithDevices {
       List<Device> devices = const []})
       : animationPicker = AnimationPicker(
           animations: [
-            FillEffectCreator(),
+            FillEffectCreator(duration: 0),
           ],
           devices: devices,
           editing: editing,
