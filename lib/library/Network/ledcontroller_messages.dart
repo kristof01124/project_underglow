@@ -19,6 +19,20 @@ enum LedControllerMessageType {
   getPowerStateResponse
 }
 
+class LedControllerGetterMessage extends NetworkMessage {
+  LedControllerGetterMessage(
+      {IP destination = const IP(0), int secondaryType = 0})
+      : super(
+          MessageHeader(
+              destination: destination,
+              messageType: MessageType(
+                ledControllerMessagePrimaryType,
+                secondaryType,
+              )),
+          EmptyMessage(),
+        );
+}
+
 class SetAnimationMessage extends NetworkMessage {
   SetAnimationMessage({
     Message? animation,
@@ -35,15 +49,13 @@ class SetAnimationMessage extends NetworkMessage {
         );
 }
 
-class GetAnimationMessage extends NetworkMessage {
+class GetAnimationMessage extends LedControllerGetterMessage {
   GetAnimationMessage({
     IP destination = const IP(0),
   }) : super(
-            MessageHeader(
-                destination: destination,
-                messageType: MessageType(ledControllerMessagePrimaryType,
-                    LedControllerMessageType.getAnimation.index)),
-            EmptyMessage());
+          destination: destination,
+          secondaryType: LedControllerMessageType.getAnimation.index,
+        );
 }
 
 class GetAnimationMessageResponse extends NetworkMessage {
@@ -73,15 +85,26 @@ class ResizeMessage extends NetworkMessage {
         );
 }
 
-class GetSizeMessage extends NetworkMessage {
+class GetSizeMessage extends LedControllerGetterMessage {
   GetSizeMessage({
     IP destination = const IP(0),
   }) : super(
+          destination: destination,
+          secondaryType: LedControllerMessageType.getSize.index,
+        );
+}
+
+class GetSizeMessageResponse extends NetworkMessage {
+  GetSizeMessageResponse({IP destination = const IP(0), int length = 0})
+      : super(
           MessageHeader(
-              destination: destination,
-              messageType: MessageType(ledControllerMessagePrimaryType,
-                  LedControllerMessageType.getSize.index)),
-          EmptyMessage(),
+            destination: destination,
+            messageType: MessageType(
+              ledControllerMessagePrimaryType,
+              LedControllerMessageType.getSize.index,
+            ),
+          ),
+          MessageUint16(length),
         );
 }
 
@@ -97,3 +120,66 @@ class SetBrigthnessMessage extends NetworkMessage {
         );
 }
 
+class GetBrightnessMessage extends NetworkMessage {
+  GetBrightnessMessage({IP destination = const IP(0)})
+      : super(
+          MessageHeader(
+            destination: destination,
+            messageType: MessageType(
+              ledControllerMessagePrimaryType,
+              LedControllerMessageType.getBrigthness.index,
+            ),
+          ),
+          EmptyMessage(),
+        );
+}
+
+class GetBrightnessMessageResponse extends NetworkMessage {
+  GetBrightnessMessageResponse(
+      {IP destination = const IP(0), int brightness = 0})
+      : super(
+          MessageHeader(
+            destination: destination,
+            messageType: MessageType(
+              ledControllerMessagePrimaryType,
+              LedControllerMessageType.getBrightnessResponse.index,
+            ),
+          ),
+          MessageUint8(brightness),
+        );
+}
+
+class SetPowerStateMessage extends NetworkMessage {
+  SetPowerStateMessage({IP destination = const IP(0), int state = 0})
+      : super(
+          MessageHeader(
+            destination: destination,
+            messageType: MessageType(
+              ledControllerMessagePrimaryType,
+              LedControllerMessageType.setPowerState.index,
+            ),
+          ),
+          MessageUint8(state),
+        );
+}
+
+class GetPowerStateMessage extends LedControllerGetterMessage {
+  GetPowerStateMessage({IP destination = const IP(0)})
+      : super(
+          destination: destination,
+          secondaryType: LedControllerMessageType.getPowerState.index,
+        );
+}
+
+class GetPowerStateMessageResponse extends NetworkMessage {
+  GetPowerStateMessageResponse({IP destination = const IP(0), int state = 0})
+      : super(
+          MessageHeader(
+              destination: destination,
+              messageType: MessageType(
+                ledControllerMessagePrimaryType,
+                LedControllerMessageType.getPowerStateResponse.index,
+              )),
+          MessageUint8(state),
+        );
+}
