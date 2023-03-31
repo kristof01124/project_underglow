@@ -6,13 +6,9 @@ var espMacAddress = "78:21:84:92:49:1E";
 
 void main() {
   runApp(
-    MaterialApp(
+    const MaterialApp(
       home: Scaffold(
-        body: AnimationCreatorWithDevices(
-                name: 'a',
-                availableDevices: DeviceManager.getDevices(),
-                editing: true)
-            .build(),
+        body: MainView(),
       ),
     ),
   );

@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:learning_dart/widgets/stateful_slider.dart';
 
@@ -46,70 +45,75 @@ class _DeviceButtonState extends State<DeviceButton> {
     if (state.on) {
       currentBackgroundColor = onBackgroundColor;
     }
-    return Container(
-      decoration: BoxDecoration(
-        color: currentBackgroundColor,
-        borderRadius: BorderRadius.circular(borderRadius),
-      ),
-      child: Column(
-        children: [
-          Expanded(
-            child: Row(
-              children: [
-                Expanded(
-                  child: Align(
-                    alignment: Alignment.centerLeft,
-                    child: Padding(
-                      padding: textPadding,
-                      child: Text(
-                        widget.device.name,
-                        style: textStyle,
+    return TextButton(
+      onPressed: () {
+        // TODO: Show the detailed view of the led
+      },
+      child: Container(
+        decoration: BoxDecoration(
+          color: currentBackgroundColor,
+          borderRadius: BorderRadius.circular(borderRadius),
+        ),
+        child: Column(
+          children: [
+            Expanded(
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Align(
+                      alignment: Alignment.centerLeft,
+                      child: Padding(
+                        padding: textPadding,
+                        child: Text(
+                          widget.device.name,
+                          style: textStyle,
+                        ),
                       ),
                     ),
                   ),
+                  TextButton(
+                    onPressed: () {},
+                    child: const Align(
+                      alignment: Alignment.topRight,
+                      child: Padding(
+                        padding: textPadding,
+                        child: Icon(Icons.power_settings_new),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Row(
+              children: [
+                Expanded(
+                  child: StatefulSlider(
+                    value: state.brightness.toDouble(),
+                    activeColor: activeColor,
+                    inactiveColor: inactiveColor,
+                    onChanged: (value) {
+                      setState(() {
+                        _setBrightness(value, widget.device);
+                      });
+                    },
+                    min: 0,
+                    max: 255,
+                  ),
                 ),
-                TextButton(
-                  onPressed: () {},
-                  child: const Align(
-                    alignment: Alignment.topRight,
-                    child: Padding(
-                      padding: textPadding,
-                      child: Icon(Icons.power_settings_new),
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: Padding(
+                    padding: textPadding,
+                    child: Text(
+                      state.animationName,
+                      style: textStyle,
                     ),
                   ),
                 ),
               ],
-            ),
-          ),
-          Row(
-            children: [
-              Expanded(
-                child: StatefulSlider(
-                  value: state.brightness.toDouble(),
-                  activeColor: activeColor,
-                  inactiveColor: inactiveColor,
-                  onChanged: (value) {
-                    setState(() {
-                      _setBrightness(value, widget.device);
-                    });
-                  },
-                  min: 0,
-                  max: 255,
-                ),
-              ),
-              Align(
-                alignment: Alignment.centerRight,
-                child: Padding(
-                  padding: textPadding,
-                  child: Text(
-                    state.animationName,
-                    style: textStyle,
-                  ),
-                ),
-              ),
-            ],
-          )
-        ],
+            )
+          ],
+        ),
       ),
     );
   }

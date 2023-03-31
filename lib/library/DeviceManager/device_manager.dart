@@ -48,7 +48,7 @@ Map<IP, LedDeviceState> _deviceData = {
 class LedDeviceState {
   bool on;
   String animationName;
-  SingleAnimationCreator? currentlyPlayingAnimation;
+  SimpleAnimationCreator? currentlyPlayingAnimation;
   int brightness;
 
   LedDeviceState({
@@ -67,7 +67,7 @@ class LedDeviceState {
 
 class SendableAnimation {
   final String name;
-  final SingleAnimationCreator creator;
+  final SimpleAnimationCreator creator;
 
   SendableAnimation({required this.name, required this.creator});
 }

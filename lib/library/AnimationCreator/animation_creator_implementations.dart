@@ -1,5 +1,3 @@
-
-
 import 'package:flutter/material.dart';
 import 'package:learning_dart/library/ArduinoNetwork/animation_message.dart';
 import 'package:learning_dart/library/ArduinoNetwork/message.dart';
@@ -9,22 +7,25 @@ import 'package:learning_dart/library/AnimationCreator/single_animation_creator.
 class FillEffectCreator extends SegmentAnimationCreator {
   FillEffectCreator({
     super.editing,
-    Function(SingleAnimationCreator creator)? onButtonPressed,
+    Function(SimpleAnimationCreator creator)? onButtonPressed,
+    double? duration,
+    Color? color,
   }) : super(
           name: 'Fill',
         ) {
     children = [
       AnimationCreatorInputField(
         currentValue: ValueWithDefault(
-          0,
+          duration ?? 0.0,
+          isDefault: duration != null,
           editing: editing,
-          isDefault: !editing,
         ),
         name: 'Duration',
       ),
       AnimationCreatorColorWheel(
         currentValue: ValueWithDefault(
-          Colors.black,
+          color ?? Colors.black,
+          isDefault: color != null,
           editing: editing,
         ),
         name: 'Color',

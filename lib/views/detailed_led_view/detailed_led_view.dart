@@ -16,8 +16,8 @@ class DetailedLedView extends StatefulWidget {
 
 class _DetailedLedViewState extends State<DetailedLedView> {
   String? value;
-  late Map<String, SingleAnimationCreator> animations;
-  SingleAnimationCreator? animationCreatorBody;
+  late Map<String, SimpleAnimationCreator> animations;
+  SimpleAnimationCreator? animationCreatorBody;
 
   @override
   void initState() {

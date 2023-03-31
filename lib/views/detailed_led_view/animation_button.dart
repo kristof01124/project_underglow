@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:learning_dart/library/AnimationCreator/single_animation_creator.dart';
 
 class AnimationButton extends StatefulWidget {
-  final SingleAnimationCreator animationCreator;
+  final SimpleAnimationCreator animationCreator;
 
   const AnimationButton({super.key, required this.animationCreator});
 
