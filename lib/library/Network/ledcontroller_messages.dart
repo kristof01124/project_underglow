@@ -35,8 +35,8 @@ class SetAnimationMessage extends NetworkMessage {
         );
 }
 
-class GetAnimationMesage extends NetworkMessage {
-  GetAnimationMesage({
+class GetAnimationMessage extends NetworkMessage {
+  GetAnimationMessage({
     IP destination = const IP(0),
   }) : super(
             MessageHeader(
@@ -58,3 +58,42 @@ class GetAnimationMessageResponse extends NetworkMessage {
           animation ?? AnimationBuilderMessage(),
         );
 }
+
+class ResizeMessage extends NetworkMessage {
+  ResizeMessage({
+    int length = 0,
+    IP destination = const IP(0),
+  }) : super(
+          MessageHeader(
+            destination: destination,
+            messageType: MessageType(ledControllerMessagePrimaryType,
+                LedControllerMessageType.resize.index),
+          ),
+          MessageUint16(length),
+        );
+}
+
+class GetSizeMessage extends NetworkMessage {
+  GetSizeMessage({
+    IP destination = const IP(0),
+  }) : super(
+          MessageHeader(
+              destination: destination,
+              messageType: MessageType(ledControllerMessagePrimaryType,
+                  LedControllerMessageType.getSize.index)),
+          EmptyMessage(),
+        );
+}
+
+class SetBrigthnessMessage extends NetworkMessage {
+  SetBrigthnessMessage({IP destination = const IP(0), int brightness = 0})
+      : super(
+          MessageHeader(
+            destination: destination,
+            messageType: MessageType(ledControllerMessagePrimaryType,
+                LedControllerMessageType.setBrigthness.index),
+          ),
+          MessageUint8(brightness),
+        );
+}
+
