@@ -39,7 +39,6 @@ class SetAnimationMessage extends NetworkMessage {
     IP destination = const IP(0),
   }) : super(
           MessageHeader(
-            protocol: NetworkManager.protocol,
             messageType: MessageType(ledControllerMessagePrimaryType,
                 LedControllerMessageType.setAnimation.index),
             source: const IP(0),

@@ -1,5 +1,7 @@
 import 'dart:typed_data';
 
+import 'package:learning_dart/library/ArduinoNetwork/network_manager.dart';
+
 class IP {
   final int entityIp; // unsigned16
 
@@ -323,10 +325,10 @@ class SegmentMessage extends Message {
 
 class IpMessageData extends SegmentMessage {
   IpMessageData([IP value = const IP(0)]) {
-    add('value', MessageUint8(value.entityIp));
+    add('value', MessageUint16(value.entityIp));
   }
 
-  IP get value => IP((segments['value'] as MessageUint8).value);
+  IP get value => IP((segments['value'] as MessageUint16).value);
 }
 
 class MessageTypeMessageData extends SegmentMessage {
@@ -343,8 +345,8 @@ class MessageTypeMessageData extends SegmentMessage {
 
 class MessageHeader extends SegmentMessage {
   MessageHeader({
-    int protocol = 0,
-    IP source = const IP(0),
+    int protocol = NetworkManager.protocol,
+    IP source = NetworkManager.phoneIP,
     IP destination = const IP(0),
     MessageType messageType = const MessageType(0, 0),
     int time = 0,
