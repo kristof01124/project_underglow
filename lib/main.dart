@@ -12,7 +12,10 @@ var espMacAddress = "78:21:84:92:49:1E";
 void main() {
   log("nice");
   log(MessageHeader().buildBuffer().toString());
-  log(GetBrightnessMessage(destination: const IP(3)).buildBuffer().toString());
+  log(SetBrigthnessMessage(
+    destination: const IP(3),
+    brightness: 60,
+  ).buildBuffer().toString());
   /*
   runApp(
     const MaterialApp(

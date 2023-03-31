@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:learning_dart/library/ArduinoNetwork/animation_message.dart';
 import 'package:learning_dart/library/ArduinoNetwork/message.dart';
 import 'package:learning_dart/library/ArduinoNetwork/network_manager.dart';
@@ -46,6 +47,8 @@ class SetAnimationMessage extends NetworkMessage {
           ),
           animation ?? AnimationBuilderMessage(),
         );
+
+  Message get animation => second;
 }
 
 class GetAnimationMessage extends LedControllerGetterMessage {
@@ -68,6 +71,8 @@ class GetAnimationMessageResponse extends NetworkMessage {
                   LedControllerMessageType.getAnimationResponse.index)),
           animation ?? AnimationBuilderMessage(),
         );
+
+  Message get animation => second;
 }
 
 class ResizeMessage extends NetworkMessage {
@@ -82,6 +87,8 @@ class ResizeMessage extends NetworkMessage {
           ),
           MessageUint16(length),
         );
+
+  int get length => (second as MessageUint16).value;
 }
 
 class GetSizeMessage extends LedControllerGetterMessage {
@@ -105,6 +112,8 @@ class GetSizeMessageResponse extends NetworkMessage {
           ),
           MessageUint16(length),
         );
+
+  int get length => (second as MessageUint16).value;
 }
 
 class SetBrigthnessMessage extends NetworkMessage {
@@ -117,6 +126,8 @@ class SetBrigthnessMessage extends NetworkMessage {
           ),
           MessageUint8(brightness),
         );
+
+  int get brightness => (second as MessageUint8).value;
 }
 
 class GetBrightnessMessage extends NetworkMessage {
@@ -146,6 +157,8 @@ class GetBrightnessMessageResponse extends NetworkMessage {
           ),
           MessageUint8(brightness),
         );
+
+  int get brigthness => (second as MessageUint8).value;
 }
 
 class SetPowerStateMessage extends NetworkMessage {
@@ -160,6 +173,8 @@ class SetPowerStateMessage extends NetworkMessage {
           ),
           MessageUint8(state),
         );
+
+  int get state => (second as MessageUint8).value;
 }
 
 class GetPowerStateMessage extends LedControllerGetterMessage {
@@ -181,4 +196,6 @@ class GetPowerStateMessageResponse extends NetworkMessage {
               )),
           MessageUint8(state),
         );
+
+  int get state => (second as MessageUint8).value;
 }
