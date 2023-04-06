@@ -16,11 +16,11 @@ class NetworkClock extends NetworkEntity {
 
   static const IP networkClockIp = IP(3);
 
-  static int lastUpdate = 0;
+  static int lastUpdate = DateTime.now().millisecondsSinceEpoch;
   static int timeDifference = 0;
   static bool isSynced = false;
 
-  // Can't be timeserver
+  // Can't be timeserver, so no need for timeserver parameter
 
   static Set<int> sentRequestTimes = {};
 
@@ -32,7 +32,12 @@ class NetworkClock extends NetworkEntity {
   }
 
   @override
-  void handle() {}
+  void handle() {
+    if (DateTime.now().millisecondsSinceEpoch - lastUpdate >
+        delay().inMilliseconds) {
+      sendSyncRequest();
+    }
+  }
 
   void handleSyncRequest(NetworkClockSyncRequest request) {
     if (!isSynced) {
@@ -83,10 +88,19 @@ class NetworkClock extends NetworkEntity {
       return DateTime.now().millisecondsSinceEpoch + timeDifference;
     }
   }
+
+  void sendSyncRequest() {
+    int time = DateTime.now().millisecondsSinceEpoch;
+    sentRequestTimes.add(time);
+    NetworkManager.handleMessage(
+      NetworkClockSyncRequest(time: time).buildBuffer(),
+      this,
+    );
+  }
 }
 
 class NetworkClockSyncRequest extends NetworkMessage {
-  NetworkClockSyncRequest()
+  NetworkClockSyncRequest({int time = 0})
       : super(
           MessageHeader(
             destination: NetworkClock.networkClockIp,
@@ -94,7 +108,7 @@ class NetworkClockSyncRequest extends NetworkMessage {
               networkClockMessagePrimaryType,
               NetworkClockMessageTypes.syncRequest.index,
             ),
-            time: DateTime.now().millisecondsSinceEpoch,
+            time: time,
           ),
           EmptyMessage(),
         );
