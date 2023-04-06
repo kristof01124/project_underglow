@@ -1,26 +1,38 @@
+import 'package:learning_dart/library/ArduinoNetwork/network_clock.dart';
 import 'package:learning_dart/library/ArduinoNetwork/network_manager.dart';
 import 'package:learning_dart/library/ArduinoNetwork/message.dart';
 import 'package:learning_dart/library/ArduinoNetwork/network_entity.dart';
 
 class MessageRouterRecord {
-  IP ipOfDevice;
-  int numberOfHops;
-  int lastUpdate;
-  NetworkEntity destinationEntity;
+  final IP ipOfDevice;
+  final int numberOfHops;
+  final int lastUpdate;
+  final NetworkEntity destinationEntity;
+  final double distance;
 
-  MessageRouterRecord(this.ipOfDevice, this.numberOfHops, this.lastUpdate,
-      this.destinationEntity);
+  MessageRouterRecord({
+    required this.ipOfDevice,
+    required this.numberOfHops,
+    required this.lastUpdate,
+    required this.destinationEntity,
+    required this.distance,
+  });
 }
 
 class MessageRouterRecordUpdate extends SegmentMessage {
   MessageRouterRecordUpdate(
-      [IP ipOfDevice = const IP(0), int numberOfHops = 0]) {
+      [IP ipOfDevice = const IP(0),
+      int numberOfHops = 0,
+      double distance = 0]) {
     add('ipOfDevice', IpMessageData(ipOfDevice));
     add('numberOfHops', MessageUint8(numberOfHops));
+    add('distance', MessageUint64(distance.toInt()));
   }
 
   IP get ipOfDevice => (segments['ipOfDevice'] as IpMessageData).value;
   int get numberOfHops => (segments['numberOfHops'] as MessageUint8).value;
+  double get distance =>
+      (segments['distance'] as MessageUint64).value.toDouble();
 }
 
 class MeRUpdateMessage extends NetworkMessage<ListMessage> {
@@ -36,7 +48,8 @@ class MeRUpdateMessage extends NetworkMessage<ListMessage> {
               ),
             ),
             ListMessage(
-              (int size) => List.filled(size, MessageRouterRecordUpdate()),
+              (int size) => List.filled(size, MessageRouterRecordUpdate(),
+                  growable: true),
             ));
 }
 
@@ -70,29 +83,34 @@ class MessageRouter extends NetworkEntity {
   }
 
   void handleUpdateMessage(MeRUpdateMessage msg, NetworkEntity src) {
-    int time = DateTime.now().millisecondsSinceEpoch;
     Map<IP, MessageRouterRecord> changed = {};
+    double delay = double.infinity;
+    if (NetworkClock.isSynced) {
+      delay = (NetworkClock.millis() - msg.first.time).toDouble();
+    }
     for (var element in msg.second.data) {
       var record = (element as MessageRouterRecordUpdate);
       MessageRouterRecord newRecord = MessageRouterRecord(
-          record.ipOfDevice, record.numberOfHops, time, src);
+        ipOfDevice: record.ipOfDevice,
+        numberOfHops: record.numberOfHops,
+        distance: record.distance + delay,
+        lastUpdate: NetworkClock.millis(),
+        destinationEntity: src,
+      );
       if (foundBetterDestinationEntity(newRecord)) {
         advertisedRecords[record.ipOfDevice] = newRecord;
         changed[record.ipOfDevice] = newRecord;
       }
     }
-    if (changed.isEmpty) {
-      return;
-    }
     sendUpdateMessageChanged(changed);
   }
 
   void broadcastMessage(List<int> buffer, NetworkEntity src) {
-    for (var element in advertisedRecords.values) {
-      sendLocal(element, buffer, src);
+    for (var value in advertisedRecords.values) {
+      sendLocal(value, buffer, src);
     }
-    for (var element in notAdvertisedRecords) {
-      sendLocal(element, buffer, src);
+    for (var value in notAdvertisedRecords) {
+      sendLocal(value, buffer, src);
     }
   }
 
@@ -111,17 +129,13 @@ class MessageRouter extends NetworkEntity {
     return false;
   }
 
-  static MessageRouterRecord findRecord(IP value) {
-    var element = advertisedRecords[value];
+  static MessageRouterRecord findRecord(IP ip) {
+    var element = advertisedRecords[ip];
     if (element != null) {
       return element;
     }
-    for (var element in notAdvertisedRecords) {
-      if (element.ipOfDevice.entityIp == value.entityIp) {
-        return element;
-      }
-    }
-    throw Exception();
+    return notAdvertisedRecords.reduce(
+        (value, element) => element.ipOfDevice == ip ? value = element : value);
   }
 
   void send(List<int> buffer, NetworkEntity src, NetworkEntity dst) {
@@ -141,33 +155,23 @@ class MessageRouter extends NetworkEntity {
     if (timeoutTime == 0) {
       return;
     }
-    List<IP> shouldBeDeleted = [];
-    int time = DateTime.now().millisecondsSinceEpoch;
-    for (var element in advertisedRecords.entries) {
-      if (element.value.lastUpdate + timeoutTime < time) {
-        shouldBeDeleted.add(element.key);
-      }
-    }
-    for (var key in shouldBeDeleted) {
-      advertisedRecords.remove(key);
-    }
-  }
-
-  static void reinforceRecord(MessageHeader header, NetworkEntity src) {
-    int time = DateTime.now().millisecondsSinceEpoch;
-    if (advertisedRecords[header.source] != null) {
-      MessageRouterRecord record =
-          (advertisedRecords[header.source] as MessageRouterRecord);
-      if (record.destinationEntity == src) {
-        record.lastUpdate = time;
-      }
-    }
+    advertisedRecords.removeWhere(
+      (key, value) =>
+          DateTime.now().millisecondsSinceEpoch - value.lastUpdate >=
+          timeoutTime,
+    );
   }
 
   static bool foundBetterDestinationEntity(MessageRouterRecord newValue) {
+    // If the new device is closer, than returns true
     if (advertisedRecords[newValue.ipOfDevice] != null) {
-      return ((advertisedRecords[newValue.ipOfDevice])?.numberOfHops ?? 0) >
-          newValue.numberOfHops;
+      if ((advertisedRecords[newValue.ipOfDevice]?.distance ??
+              double.infinity) >
+          newValue.distance) {
+        return true;
+      } else {
+        return false;
+      }
     }
     return true;
   }
@@ -176,26 +180,34 @@ class MessageRouter extends NetworkEntity {
   void handleMessage(List<int> buffer, NetworkEntity src) {
     MessageHeader msg = MessageHeader();
     msg.build(buffer);
+    if (msg.destination == messageRouterIp && msg.numberOfHops > 0) {
+      // This part only works, because the only messsage that should be sent to the MeR is an update message!!!!!
+      MeRUpdateMessage update = MeRUpdateMessage();
+      update.build(buffer);
+      handleUpdateMessage(update, src);
+      return;
+    }
     if (msg.destination == broadcastIP) {
       broadcastMessage(buffer, src);
-    } else {
-      if (!containsRecord(msg.destination)) {
-        return;
-      }
-      var element = findRecord(msg.destination);
-      if (element.destinationEntity == src) {
-        broadcastMessage(buffer, src);
-        return;
-      }
-      element.destinationEntity.handleMessage(buffer, src);
+      return;
     }
+    if (!containsRecord(msg.destination)) {
+      return;
+    }
+    // This should not throw, because of the previous statement
+    var element = findRecord(msg.destination);
+    if (element.destinationEntity == src) {
+      broadcastMessage(buffer, src);
+      return;
+    }
+    element.destinationEntity.handleMessage(buffer, src);
   }
 
   @override
   void handle() {
     int time = DateTime.now().millisecondsSinceEpoch;
     if (time - lastUpdate >= updateTime) {
-      sendUpdateMessage();
+      // sendUpdateMessage(); This is probably not neccessary for the phone part
       pruneInactiveRecords();
     }
   }
@@ -215,11 +227,23 @@ class MessageRouter extends NetworkEntity {
 
   static void addEntity(NetworkEntity entity) {
     if (entity.advertised()) {
-      advertisedRecords[entity.getIp()] =
-          MessageRouterRecord(entity.getIp(), 0, 0, entity);
+      advertisedRecords[entity.getIp()] = MessageRouterRecord(
+        ipOfDevice: entity.getIp(),
+        numberOfHops: 0,
+        lastUpdate: DateTime.now().millisecondsSinceEpoch,
+        distance: 0,
+        destinationEntity: entity,
+      );
     } else {
-      notAdvertisedRecords
-          .add(MessageRouterRecord(entity.getIp(), 0, 0, entity));
+      notAdvertisedRecords.add(
+        MessageRouterRecord(
+          ipOfDevice: entity.getIp(),
+          numberOfHops: 0,
+          lastUpdate: DateTime.now().millisecondsSinceEpoch,
+          distance: 0,
+          destinationEntity: entity,
+        ),
+      );
     }
   }
 }

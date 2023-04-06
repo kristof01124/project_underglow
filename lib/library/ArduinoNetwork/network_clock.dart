@@ -1,7 +1,7 @@
 import 'package:learning_dart/library/ArduinoNetwork/message.dart';
 import 'package:learning_dart/library/ArduinoNetwork/network_manager.dart';
 
-import '../ArduinoNetwork/network_entity.dart';
+import 'network_entity.dart';
 
 int networkClockMessagePrimaryType = 3;
 

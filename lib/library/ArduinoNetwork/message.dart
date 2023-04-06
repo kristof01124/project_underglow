@@ -423,6 +423,12 @@ class ListMessage extends PairMessage<MessageUint16, MessageArray> {
   List<Message> get data => second.value;
 
   @override
+  List<int> buildBuffer() {
+    first.value = data.length;
+    return super.buildBuffer();
+  }
+
+  @override
   void build(List<int> buffer) {
     MessageUint16 size = MessageUint16(0);
     size.build(buffer);

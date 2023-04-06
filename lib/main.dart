@@ -3,7 +3,7 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:learning_dart/library/AnimationCreator/animation_creator_with_device.dart';
 import 'package:learning_dart/library/DeviceManager/device_manager.dart';
-import 'package:learning_dart/library/Network/ledcontroller_messages.dart';
+import 'package:learning_dart/library/ArduinoNetwork/ledcontroller_messages.dart';
 
 import 'library/ArduinoNetwork/message.dart';
 
