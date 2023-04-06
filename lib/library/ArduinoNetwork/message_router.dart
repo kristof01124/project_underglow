@@ -20,10 +20,11 @@ class MessageRouterRecord {
 }
 
 class MessageRouterRecordUpdate extends SegmentMessage {
-  MessageRouterRecordUpdate(
-      [IP ipOfDevice = const IP(0),
-      int numberOfHops = 0,
-      double distance = 0]) {
+  MessageRouterRecordUpdate({
+    IP ipOfDevice = const IP(0),
+    int numberOfHops = 0,
+    double distance = 0,
+  }) {
     add('ipOfDevice', IpMessageData(ipOfDevice));
     add('numberOfHops', MessageUint8(numberOfHops));
     add('distance', MessageUint64(distance.toInt()));
@@ -76,8 +77,12 @@ class MessageRouter extends NetworkEntity {
     }
     MeRUpdateMessage update = MeRUpdateMessage();
     for (var element in changed.values) {
-      update.second.data.add(MessageRouterRecordUpdate(
-          element.ipOfDevice, element.numberOfHops + 1));
+      update.second.data.add(
+        MessageRouterRecordUpdate(
+          ipOfDevice: element.ipOfDevice,
+          numberOfHops: element.numberOfHops,
+        ),
+      );
     }
     NetworkManager.handleMessage(update.buildBuffer(), this);
   }

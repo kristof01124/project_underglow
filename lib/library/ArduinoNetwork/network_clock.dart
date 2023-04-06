@@ -3,8 +3,6 @@ import 'package:learning_dart/library/ArduinoNetwork/network_manager.dart';
 
 import 'network_entity.dart';
 
-int networkClockMessagePrimaryType = 3;
-
 enum NetworkClockMessageTypes {
   syncRequest,
   syncResponse,
@@ -15,6 +13,7 @@ class NetworkClock extends NetworkEntity {
       delayWhenNotSynced = const Duration(milliseconds: 100);
 
   static const IP networkClockIp = IP(3);
+  static const int messagePrimaryType = 3;
 
   static int lastUpdate = DateTime.now().millisecondsSinceEpoch;
   static int timeDifference = 0;
@@ -66,7 +65,7 @@ class NetworkClock extends NetworkEntity {
   void handleMessage(List<int> buffer, NetworkEntity src) {
     MessageHeader header = MessageHeader();
     header.build(buffer);
-    if (header.messageType.mainType != networkClockMessagePrimaryType) {
+    if (header.messageType.mainType != messagePrimaryType) {
       return;
     }
     int type = header.messageType.secondaryType;
@@ -105,7 +104,7 @@ class NetworkClockSyncRequest extends NetworkMessage {
           MessageHeader(
             destination: NetworkClock.networkClockIp,
             messageType: MessageType(
-              networkClockMessagePrimaryType,
+              NetworkClock.messagePrimaryType,
               NetworkClockMessageTypes.syncRequest.index,
             ),
             time: time,
@@ -117,7 +116,13 @@ class NetworkClockSyncRequest extends NetworkMessage {
 class NetworkClockSyncResponse extends NetworkMessage {
   NetworkClockSyncResponse({int sentTime = 0})
       : super(
-          MessageHeader(),
+          MessageHeader(
+            destination: NetworkClock.networkClockIp,
+            messageType: MessageType(
+              NetworkClock.messagePrimaryType,
+              NetworkClockMessageTypes.syncRequest.index,
+            ),
+          ),
           MessageUint64(
             sentTime,
           ),

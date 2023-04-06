@@ -20,24 +20,28 @@ class GVSUpdateRecordData extends PairMessage<MessageUint16, MessageFloat32> {
 class GvsUpdate extends NetworkMessage<ListMessage> {
   GvsUpdate()
       : super(
-            MessageHeader(
-              protocol: NetworkManager.protocol,
-              source: GlobalValueStore.globalValueStoreIp,
-              destination: GlobalValueStore.globalValueStoreIp,
-              messageType: const MessageType(
-                GlobalValueStore.messagePrimaryType,
-                GlobalValueStore.updateMessageSecondaryType,
+          MessageHeader(
+            protocol: NetworkManager.protocol,
+            source: GlobalValueStore.globalValueStoreIp,
+            destination: GlobalValueStore.globalValueStoreIp,
+            messageType: MessageType(
+              GlobalValueStore.messagePrimaryType,
+              GlobalValueStoreMessageTypes.update.index,
+            ),
+          ),
+          ListMessage(
+            (int size) => List.filled(
+              size,
+              GVSUpdateRecordData(
+                MessageUint16(0),
+                MessageFloat32(0),
               ),
             ),
-            ListMessage(
-              (int size) => List.filled(
-                  size,
-                  GVSUpdateRecordData(
-                    MessageUint16(0),
-                    MessageFloat32(0),
-                  )),
-            ));
+          ),
+        );
 }
+
+enum GlobalValueStoreMessageTypes { update }
 
 class GlobalValueStore extends NetworkEntity {
   static const int numberOfFloats32 = 256;
@@ -45,7 +49,6 @@ class GlobalValueStore extends NetworkEntity {
   static int lastUpdate = 0;
 
   static const int messagePrimaryType = 2;
-  static const int updateMessageSecondaryType = 1;
 
   static const IP globalValueStoreIp = IP(2);
 
@@ -86,7 +89,8 @@ class GlobalValueStore extends NetworkEntity {
     MessageHeader header = MessageHeader();
     header.build(buffer);
     if (header.messageType ==
-        const MessageType(messagePrimaryType, updateMessageSecondaryType)) {
+        MessageType(
+            messagePrimaryType, GlobalValueStoreMessageTypes.update.index)) {
       GvsUpdate update = GvsUpdate();
       update.build(buffer);
       handleUpdate(update);
