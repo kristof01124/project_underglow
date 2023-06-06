@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 
+import 'package:learning_dart/library/ArduinoNetwork/network_clock.dart';
 import 'package:learning_dart/library/ArduinoNetwork/network_manager.dart';
 
 class IP {
@@ -396,6 +397,7 @@ class MessageHeader extends SegmentMessage {
   void setup(int sizeOfPayload) {
     segments['sizeOfPayload'] = MessageUint16(sizeOfPayload);
     segments['numberOfHops'] = MessageUint8(numberOfHops + 1);
+    segments['time'] = MessageUint64(NetworkClock.millis());
   }
 }
 
@@ -421,6 +423,12 @@ class ListMessage extends PairMessage<MessageUint16, MessageArray> {
   ListMessage(this.builder) : super(MessageUint16(0), MessageArray(builder(0)));
 
   List<Message> get data => second.value;
+
+  @override
+  List<int> buildBuffer() {
+    first.value = data.length;
+    return super.buildBuffer();
+  }
 
   @override
   void build(List<int> buffer) {

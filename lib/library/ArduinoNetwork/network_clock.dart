@@ -1,9 +1,7 @@
 import 'package:learning_dart/library/ArduinoNetwork/message.dart';
 import 'package:learning_dart/library/ArduinoNetwork/network_manager.dart';
 
-import '../ArduinoNetwork/network_entity.dart';
-
-int networkClockMessagePrimaryType = 3;
+import 'network_entity.dart';
 
 enum NetworkClockMessageTypes {
   syncRequest,
@@ -15,12 +13,13 @@ class NetworkClock extends NetworkEntity {
       delayWhenNotSynced = const Duration(milliseconds: 100);
 
   static const IP networkClockIp = IP(3);
+  static const int messagePrimaryType = 3;
 
-  static int lastUpdate = 0;
+  static int lastUpdate = DateTime.now().millisecondsSinceEpoch;
   static int timeDifference = 0;
   static bool isSynced = false;
 
-  // Can't be timeserver
+  // Can't be timeserver, so no need for timeserver parameter
 
   static Set<int> sentRequestTimes = {};
 
@@ -32,7 +31,12 @@ class NetworkClock extends NetworkEntity {
   }
 
   @override
-  void handle() {}
+  void handle() {
+    if (DateTime.now().millisecondsSinceEpoch - lastUpdate >
+        delay().inMilliseconds) {
+      sendSyncRequest();
+    }
+  }
 
   void handleSyncRequest(NetworkClockSyncRequest request) {
     if (!isSynced) {
@@ -61,7 +65,7 @@ class NetworkClock extends NetworkEntity {
   void handleMessage(List<int> buffer, NetworkEntity src) {
     MessageHeader header = MessageHeader();
     header.build(buffer);
-    if (header.messageType.mainType != networkClockMessagePrimaryType) {
+    if (header.messageType.mainType != messagePrimaryType) {
       return;
     }
     int type = header.messageType.secondaryType;
@@ -83,18 +87,27 @@ class NetworkClock extends NetworkEntity {
       return DateTime.now().millisecondsSinceEpoch + timeDifference;
     }
   }
+
+  void sendSyncRequest() {
+    int time = DateTime.now().millisecondsSinceEpoch;
+    sentRequestTimes.add(time);
+    NetworkManager.handleMessage(
+      NetworkClockSyncRequest(time: time).buildBuffer(),
+      this,
+    );
+  }
 }
 
 class NetworkClockSyncRequest extends NetworkMessage {
-  NetworkClockSyncRequest()
+  NetworkClockSyncRequest({int time = 0})
       : super(
           MessageHeader(
             destination: NetworkClock.networkClockIp,
             messageType: MessageType(
-              networkClockMessagePrimaryType,
+              NetworkClock.messagePrimaryType,
               NetworkClockMessageTypes.syncRequest.index,
             ),
-            time: DateTime.now().millisecondsSinceEpoch,
+            time: time,
           ),
           EmptyMessage(),
         );
@@ -103,7 +116,13 @@ class NetworkClockSyncRequest extends NetworkMessage {
 class NetworkClockSyncResponse extends NetworkMessage {
   NetworkClockSyncResponse({int sentTime = 0})
       : super(
-          MessageHeader(),
+          MessageHeader(
+            destination: NetworkClock.networkClockIp,
+            messageType: MessageType(
+              NetworkClock.messagePrimaryType,
+              NetworkClockMessageTypes.syncRequest.index,
+            ),
+          ),
           MessageUint64(
             sentTime,
           ),
