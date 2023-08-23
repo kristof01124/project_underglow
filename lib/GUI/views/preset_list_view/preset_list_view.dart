@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:learning_dart/library/PresetManager/preset_manager.dart';
-import 'package:learning_dart/views/preset_list_view/preset_list_button.dart';
-import 'package:learning_dart/widgets/folded_header.dart';
+import 'package:learning_dart/GUI/views/preset_list_view/preset_list_button.dart';
+import 'package:learning_dart/GUI/elements/folded_header.dart';
 
-import '../../widgets/columns.dart';
+import '../../elements/columns.dart';
 
 class PresetListView extends StatefulWidget {
   final int? currentIndex;

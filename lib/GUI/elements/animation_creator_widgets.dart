@@ -1,6 +1,8 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:learning_dart/library/AnimationCreator/single_animation_creator.dart';
-import 'package:learning_dart/widgets/stateful_slider.dart';
+import 'package:learning_dart/GUI/elements/stateful_slider.dart';
 import 'my_color_picker.dart';
 
 class AnimationCreatorWrapper extends StatefulWidget {
@@ -84,8 +86,12 @@ class AnimationCreatorInputField extends StatelessWidget {
           child: TextField(
             keyboardType: TextInputType.number,
             onChanged: (value) {
-              // TODO: handle case when a non-number is inputted
-              currentValue.value = double.parse(value);
+              // TODO: handle case when a non-number is inputted (in the ui)
+              try {
+                currentValue.value = double.parse(value);
+              } catch (e) {
+                log(e.toString());
+              }
             },
           ),
         ));

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:learning_dart/widgets/stateful_slider.dart';
+import 'package:learning_dart/GUI/elements/stateful_slider.dart';
 
-import '../../library/DeviceManager/device_manager.dart';
+import '../../../library/DeviceManager/device_manager.dart';
 
 const Color onBackgroundColor = Colors.green, offBackgroundColor = Colors.red;
 

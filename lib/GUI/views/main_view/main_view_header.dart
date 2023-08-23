@@ -16,7 +16,8 @@ class MainViewHeader extends StatelessWidget {
         titlePadding: const EdgeInsets.all(5),
         title: Center(
           child: Image.file(
-            File('C:\\Users\\krist\\Downloads\\Project_Underlow_logo.png'),
+            File(
+                'C:\\Users\\krist\\Downloads\\Project_Underlow_logo.png'), // This is obviously temporary
           ),
         ),
       ),

@@ -2,7 +2,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
-import 'package:learning_dart/widgets/columns.dart';
+import 'package:learning_dart/GUI/elements/columns.dart';
 
 class ColorPickerPalette extends StatelessWidget {
   final List<Color> availableColors;

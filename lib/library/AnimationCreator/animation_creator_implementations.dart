@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:learning_dart/library/ArduinoNetwork/animation_message.dart';
 import 'package:learning_dart/library/ArduinoNetwork/message.dart';
-import 'package:learning_dart/widgets/animation_creator_widgets.dart';
+import 'package:learning_dart/GUI/elements/animation_creator_widgets.dart';
 import 'package:learning_dart/library/AnimationCreator/single_animation_creator.dart';
 
 class FillEffectCreator extends SegmentAnimationCreator {

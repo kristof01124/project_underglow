@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:learning_dart/library/ArduinoNetwork/message_router.dart';
-import 'package:learning_dart/views/detailed_led_view/detailed_led_view.dart';
+import 'package:learning_dart/GUI/views/detailed_led_view/detailed_led_view.dart';
 import 'package:learning_dart/library/AnimationCreator/single_animation_creator.dart';
 
 import '../ArduinoNetwork/message.dart';

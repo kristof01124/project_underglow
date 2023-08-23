@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:learning_dart/library/AnimationCreator/animation_creator_implementations.dart';
 import 'package:learning_dart/library/DeviceManager/device_manager.dart';
 import 'package:learning_dart/library/AnimationCreator/single_animation_creator.dart';
-import 'package:learning_dart/widgets/folded_header.dart';
+import 'package:learning_dart/GUI/elements/folded_header.dart';
 
 class DetailedLedView extends StatefulWidget {
   const DetailedLedView({super.key, required this.devices});
