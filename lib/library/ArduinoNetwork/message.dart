@@ -4,7 +4,7 @@ import 'package:learning_dart/library/ArduinoNetwork/network_clock.dart';
 import 'package:learning_dart/library/ArduinoNetwork/network_manager.dart';
 
 class IP {
-  final int entityIp; // unsigned16
+  final int entityIp;
 
   const IP(this.entityIp);
 
@@ -360,7 +360,7 @@ class MessageHeader extends SegmentMessage {
     add('destination', IpMessageData(destination));
     add('messageType', MessageTypeMessageData(messageType));
     add('time', MessageUint64(time));
-    add('checksum', MessageUint8(checksum));
+    add('checksum', MessageUint16(checksum));
     add('sizeOfPayload', MessageUint16(sizeOfPayload));
     add('numberOfHops', MessageUint8(numberOfHops));
   }
@@ -371,16 +371,29 @@ class MessageHeader extends SegmentMessage {
   MessageType get messageType =>
       (segments['messageType'] as MessageTypeMessageData).value;
   int get time => (segments['time'] as MessageUint64).value;
-  int get checksum => (segments['checksum'] as MessageUint8).value;
+  int get checksum => (segments['checksum'] as MessageUint16).value;
   int get sizeOfPayload => (segments['sizeOfPayload'] as MessageUint16).value;
   int get numberOfHops => (segments['numberOfHops'] as MessageUint8).value;
 
   int calculateChecksum() {
+    if (checksum > 0) {
+      return MessageHeader(
+        protocol: protocol,
+        source: source,
+        destination: destination,
+        messageType: messageType,
+        time: time,
+        sizeOfPayload: sizeOfPayload,
+        numberOfHops: numberOfHops,
+      ).calculateChecksum();
+    }
     int out = 0;
     for (int element in buildBuffer()) {
       out += element;
+      if (element > 0) {
+        out *= element;
+      }
     }
-    out -= checksum;
     return out;
   }
 
@@ -398,6 +411,7 @@ class MessageHeader extends SegmentMessage {
     segments['sizeOfPayload'] = MessageUint16(sizeOfPayload);
     segments['numberOfHops'] = MessageUint8(numberOfHops + 1);
     segments['time'] = MessageUint64(NetworkClock.millis());
+    segments['checksum'] = MessageUint16(calculateChecksum());
   }
 }
 
