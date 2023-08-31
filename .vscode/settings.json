@@ -1,6 +1,6 @@
 {
     "cmake.sourceDirectory": "${workspaceFolder}/linux",
-    "dart.flutterSdkPath": "D:\\flutter\\flutter",
+    "dart.flutterSdkPath": "C:\\flutter",
     "java.configuration.updateBuildConfiguration": "disabled",
     "C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools"
 }

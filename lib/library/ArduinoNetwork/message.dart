@@ -347,7 +347,7 @@ class MessageTypeMessageData extends SegmentMessage {
 class MessageHeader extends SegmentMessage {
   MessageHeader({
     int protocol = NetworkManager.protocol,
-    IP source = NetworkManager.phoneIP,
+    IP source = const IP(0),
     IP destination = const IP(0),
     MessageType messageType = const MessageType(0, 0),
     int time = 0,
@@ -434,8 +434,8 @@ class IndexedMessages<T extends Message> extends PairMessage<MessageUint16, T> {
 class ListMessage extends PairMessage<MessageUint16, MessageArray> {
   List<Message> Function(int size) builder;
 
-  ListMessage(this.builder) : super(MessageUint16(0), MessageArray(builder(0)));
-
+  ListMessage(this.builder, {List<Message> data = const []})
+      : super(MessageUint16(0), MessageArray(data));
   List<Message> get data => second.value;
 
   @override

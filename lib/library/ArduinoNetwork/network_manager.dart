@@ -1,34 +1,54 @@
 import 'package:learning_dart/library/ArduinoNetwork/network_entity.dart';
 
-import 'message.dart';
 
 class NetworkManager {
-  static const IP phoneIP = IP(10);
-  static const int protocol = 1;
+  static List<NetworkEntity> switches = [],
+      backgroundDaemons = [],
+      advertisedEntities = [];
 
   static late NetworkEntity messageRouter;
 
-  static List<NetworkEntity> entities = [];
+  static const int protocol = 1;
 
   static void handleMessage(List<int> buffer, NetworkEntity src) {
     messageRouter.handleMessage(buffer, src);
   }
 
   static void initialize() {
-    for (NetworkEntity entity in entities) {
+    messageRouter.initialize();
+    for (NetworkEntity entity in advertisedEntities) {
+      entity.initialize();
+    }
+    for (NetworkEntity entity in switches) {
+      entity.initialize();
+    }
+    for (NetworkEntity entity in backgroundDaemons) {
       entity.initialize();
     }
   }
 
   static void handle() {
     messageRouter.handle();
-    for (var entity in entities) {
+    for (NetworkEntity entity in advertisedEntities) {
+      entity.handle();
+    }
+    for (NetworkEntity entity in switches) {
+      entity.handle();
+    }
+    for (NetworkEntity entity in backgroundDaemons) {
       entity.handle();
     }
   }
 
-  static void addEntity(NetworkEntity entity) {
-    entities.add(entity);
-    messageRouter.initialize();
+  static void addBackgroundDaemon(NetworkEntity entity) {
+    backgroundDaemons.add(entity);
+  }
+
+  static void addSwitch(NetworkEntity entity) {
+    switches.add(entity);
+  }
+
+  static void addAdvertisedEntity(NetworkEntity entity) {
+    advertisedEntities.add(entity);
   }
 }

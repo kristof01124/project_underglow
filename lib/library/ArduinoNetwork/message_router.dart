@@ -1,146 +1,169 @@
+import 'dart:ffi';
+
+import 'package:flutter/material.dart';
 import 'package:learning_dart/library/ArduinoNetwork/network_clock.dart';
 import 'package:learning_dart/library/ArduinoNetwork/network_manager.dart';
 import 'package:learning_dart/library/ArduinoNetwork/message.dart';
 import 'package:learning_dart/library/ArduinoNetwork/network_entity.dart';
 
-class MessageRouterRecord {
-  final IP ipOfDevice;
-  final int numberOfHops;
-  final int lastUpdate;
-  final NetworkEntity destinationEntity;
-  final double distance;
+int ucharMax = 255;
 
-  MessageRouterRecord({
-    required this.ipOfDevice,
-    required this.numberOfHops,
-    required this.lastUpdate,
-    required this.destinationEntity,
-    required this.distance,
-  });
+class MessageRouterRecord {
+  int numberOfHops;
+  NetworkEntity destinationEntity;
+
+  MessageRouterRecord({this.numberOfHops = 0, required this.destinationEntity});
 }
 
 class MessageRouterRecordUpdate extends SegmentMessage {
-  MessageRouterRecordUpdate({
-    IP ipOfDevice = const IP(0),
-    int numberOfHops = 0,
-    double distance = 0,
-  }) {
-    add('ipOfDevice', IpMessageData(ipOfDevice));
-    add('numberOfHops', MessageUint8(numberOfHops));
-    add('distance', MessageUint64(distance.toInt()));
+  MessageRouterRecordUpdate(
+      {IP ipOfDevice = const IP(0), int numberOfHops = 0}) {
+    add("ipOfDevice", IpMessageData(ipOfDevice));
+    add("numberOfHops", MessageUint8(numberOfHops));
   }
 
-  IP get ipOfDevice => (segments['ipOfDevice'] as IpMessageData).value;
-  int get numberOfHops => (segments['numberOfHops'] as MessageUint8).value;
-  double get distance =>
-      (segments['distance'] as MessageUint64).value.toDouble();
+  get ipOfDevice => (segments["ipOfDevice"] as IpMessageData).value;
+  get numberOfHops => (segments["numberOfHops"] as MessageUint8).value;
 }
 
-class MeRUpdateMessage extends NetworkMessage<ListMessage> {
-  MeRUpdateMessage()
-      : super(
-            MessageHeader(
-              protocol: NetworkManager.protocol,
-              source: MessageRouter.messageRouterIp,
-              destination: MessageRouter.messageRouterIp,
-              messageType: const MessageType(
-                MessageRouter.messagePrimaryType,
-                MessageRouter.updateMessageSecondaryType,
-              ),
-            ),
-            ListMessage(
-              (int size) => List.filled(size, MessageRouterRecordUpdate(),
-                  growable: true),
-            ));
+enum MessageRouterMessageTypes {
+  updateMessage,
+  updateRequest,
 }
+
+typedef MessageRouterUpdateMessage = NetworkMessage<ListMessage>;
+typedef MessageRouterUpdateRequest = NetworkMessage<EmptyMessage>;
 
 class MessageRouter extends NetworkEntity {
-  static const int messagePrimaryType = 4;
-  static const int updateMessageSecondaryType = 1;
+  static const IP defautltIp = IP(0);
+  static const IP broadcastIP = IP(255);
+  static const IP localBroadcastIP = IP(254);
 
-  static const IP messageRouterIp = IP(1);
+  int messagePrimaryType = 4;
+  static IP messageRouterIp = const IP(1);
 
-  static const int timeoutTime = 0;
-  static const int updateTime = 1000;
-
-  static int lastUpdate = 0;
-  static Map<IP, MessageRouterRecord> advertisedRecords = {};
-  static List<MessageRouterRecord> notAdvertisedRecords = [];
-
-  void sendUpdateMessage() {
-    sendUpdateMessageChanged(advertisedRecords);
-  }
-
-  void sendUpdateMessageChanged(Map<IP, MessageRouterRecord> changed) {
-    if (changed.isEmpty) {
-      return;
-    }
-    MeRUpdateMessage update = MeRUpdateMessage();
-    for (var element in changed.values) {
-      update.second.data.add(
-        MessageRouterRecordUpdate(
-          ipOfDevice: element.ipOfDevice,
-          numberOfHops: element.numberOfHops,
+  MessageRouterUpdateMessage createMessageRouterUpdateMessage(
+      {IP source = const IP(0),
+      Map<IP, MessageRouterRecord> advertisedRecords = const {}}) {
+    return MessageRouterUpdateMessage(
+        MessageHeader(
+          source: source,
+          destination: source,
+          messageType: MessageType(messagePrimaryType,
+              MessageRouterMessageTypes.updateMessage.index),
         ),
-      );
-    }
-    NetworkManager.handleMessage(update.buildBuffer(), this);
+        ListMessage((size) => List.filled(size, MessageRouterRecordUpdate()),
+            data: createListFromAdvertisedRecords(advertisedRecords)));
   }
 
-  void handleUpdateMessage(MeRUpdateMessage msg, NetworkEntity src) {
-    Map<IP, MessageRouterRecord> changed = {};
-    double delay = double.infinity;
-    if (NetworkClock.isSynced) {
-      delay = (NetworkClock.millis() - msg.first.time).toDouble();
-    }
-    for (var element in msg.second.data) {
-      var record = (element as MessageRouterRecordUpdate);
-      MessageRouterRecord newRecord = MessageRouterRecord(
-        ipOfDevice: record.ipOfDevice,
-        numberOfHops: record.numberOfHops,
-        distance: record.distance + delay,
-        lastUpdate: NetworkClock.millis(),
-        destinationEntity: src,
-      );
-      if (foundBetterDestinationEntity(newRecord)) {
-        advertisedRecords[record.ipOfDevice] = newRecord;
-        changed[record.ipOfDevice] = newRecord;
+  MessageRouterUpdateRequest createMessageRouterUpdateRequest(
+      {IP source = const IP(0)}) {
+    return MessageRouterUpdateRequest(
+      MessageHeader(
+          source: source,
+          destination: source,
+          messageType: MessageType(
+            messagePrimaryType,
+            MessageRouterMessageTypes.updateRequest.index,
+          )),
+      EmptyMessage(),
+    );
+  }
+
+  void handleUpdateMessage(
+      List<int> buffer, NetworkEntity src, MessageHeader header) {
+    MessageRouterUpdateMessage update = createMessageRouterUpdateMessage();
+    update.build(buffer);
+    Map<IP, MessageRouterRecord> updatedValues = {};
+    for (var value in (update.second.data as List<MessageRouterRecordUpdate>)) {
+      if (foundBetterDestinationEntity(
+          MessageRouterRecord(
+              destinationEntity: src, numberOfHops: value.numberOfHops),
+          value.ipOfDevice)) {
+        updatedValues[value.ipOfDevice] = MessageRouterRecord(
+            destinationEntity: src, numberOfHops: value.numberOfHops);
       }
     }
-    sendUpdateMessageChanged(changed);
+    updatedValues.forEach((key, value) {
+      routingRecords[key] = value;
+    });
+    if (updatedValues.isNotEmpty) {
+      NetworkManager.handleMessage(
+          createMessageRouterUpdateMessage(
+                  source: messageRouterIp, advertisedRecords: updatedValues)
+              .buildBuffer(),
+          this);
+    }
   }
 
-  void broadcastMessage(List<int> buffer, NetworkEntity src) {
-    for (var value in advertisedRecords.values) {
-      sendLocal(value, buffer, src);
-    }
-    for (var value in notAdvertisedRecords) {
-      sendLocal(value, buffer, src);
-    }
+  void handleUpdateRequestMessage(
+      List<int> buffer, NetworkEntity src, MessageHeader header) {
+    src.handleMessage(
+        createMessageRouterUpdateMessage(
+                advertisedRecords: routingRecords, source: messageRouterIp)
+            .buildBuffer(),
+        this);
   }
 
-  static bool containsRecord(IP value) {
-    if (value == defautltIP) {
-      return false;
-    }
-    if (advertisedRecords.containsKey(value)) {
-      return true;
-    }
-    for (var element in notAdvertisedRecords) {
-      if (element.ipOfDevice.entityIp == value.entityIp) {
-        return true;
+  void handleSyncNotification(
+      List<int> buffer, NetworkEntity src, MessageHeader header) {
+    NetworkManager.handleMessage(
+      createMessageRouterUpdateMessage(
+              advertisedRecords: routingRecords, source: messageRouterIp)
+          .buildBuffer(),
+      this,
+    );
+    NetworkManager.handleMessage(
+      createMessageRouterUpdateRequest(source: messageRouterIp).buildBuffer(),
+      this,
+    );
+  }
+
+  Map<IP, MessageRouterRecord> routingRecords = {};
+
+  @override
+  void handle() {}
+
+  @override
+  void handleMessage(List<int> buffer, NetworkEntity src) {
+    MessageHeader header = MessageHeader();
+
+    header.build(buffer);
+    if (src == this && header.destination == getIp()) {
+      broadcastMessage(buffer, src, includeMessageRouter: false);
+    } else if (header.destination == getIp()) {
+      handleMessageInternally(buffer, src, header);
+    } else if (header.destination == broadcastIP) {
+      broadcastMessage(buffer, src);
+    } else if (header.destination == localBroadcastIP) {
+      localBroadcastMessage(buffer, src);
+    } else {
+      if (!containsRecord(header.destination)) {
+        return;
+      }
+      var element = findRecord(header.destination);
+      if (element != null) {
+        if (element.destinationEntity == src) {
+          broadcastMessage(buffer, src, includeMessageRouter: false);
+          return;
+        }
+        element.destinationEntity.handleMessage(buffer, src);
       }
     }
-    return false;
   }
 
-  static MessageRouterRecord findRecord(IP ip) {
-    var element = advertisedRecords[ip];
-    if (element != null) {
-      return element;
+  @override
+  void initialize() {
+    routingRecords.clear();
+    for (var i in NetworkManager.advertisedEntities) {
+      routingRecords[i.ip] =
+          MessageRouterRecord(destinationEntity: i, numberOfHops: 0);
     }
-    return notAdvertisedRecords.reduce(
-        (value, element) => element.ipOfDevice == ip ? value = element : value);
+    for (var i in NetworkManager.backgroundDaemons) {
+      routingRecords[i.ip] =
+          MessageRouterRecord(destinationEntity: i, numberOfHops: 0);
+    }
+    super.initialize();
   }
 
   void send(List<int> buffer, NetworkEntity src, NetworkEntity dst) {
@@ -156,99 +179,79 @@ class MessageRouter extends NetworkEntity {
     }
   }
 
-  static void pruneInactiveRecords() {
-    if (timeoutTime == 0) {
-      return;
+  bool containsRecord(IP ip) {
+    return findRecord(ip) != null;
+  }
+
+  MessageRouterRecord? findRecord(IP ip) {
+    return routingRecords[ip];
+  }
+
+  bool foundBetterDestinationEntity(MessageRouterRecord newValue, IP ip) {
+    return newValue.numberOfHops < (findRecord(ip)?.numberOfHops ?? ucharMax);
+  }
+
+  void broadcastMessage(List<int> buffer, NetworkEntity src,
+      {bool includeMessageRouter = true}) {
+    for (NetworkEntity entity in NetworkManager.switches) {
+      send(buffer, src, entity);
     }
-    advertisedRecords.removeWhere(
-      (key, value) =>
-          DateTime.now().millisecondsSinceEpoch - value.lastUpdate >=
-          timeoutTime,
+    localBroadcastMessage(
+      buffer,
+      src,
+      includeMessageRouter: includeMessageRouter,
     );
   }
 
-  static bool foundBetterDestinationEntity(MessageRouterRecord newValue) {
-    // If the new device is closer, than returns true
-    if (advertisedRecords[newValue.ipOfDevice] != null) {
-      if ((advertisedRecords[newValue.ipOfDevice]?.distance ??
-              double.infinity) >
-          newValue.distance) {
-        return true;
-      } else {
-        return false;
+  void localBroadcastMessage(List<int> buffer, NetworkEntity src,
+      {bool includeMessageRouter = true}) {
+    for (NetworkEntity entity in NetworkManager.advertisedEntities) {
+      send(buffer, src, entity);
+    }
+    for (NetworkEntity entity in NetworkManager.backgroundDaemons) {
+      send(buffer, src, entity);
+    }
+    if (includeMessageRouter) {
+      MessageHeader header = MessageHeader();
+      header.build(buffer);
+      handleMessageInternally(buffer, src, header);
+    }
+  }
+
+  void handleMessageInternally(
+      List<int> buffer, NetworkEntity src, MessageHeader header) {
+    if (header.messageType ==
+        MessageType(NetworkClock.messagePrimaryType,
+            NetworkClockMessageTypes.syncNotification.index)) {
+      handleSyncNotification(buffer, src, header);
+    }
+    if (header.messageType.mainType == messagePrimaryType) {
+      if (header.messageType.secondaryType ==
+          MessageRouterMessageTypes.updateMessage.index) {
+        handleUpdateMessage(buffer, src, header);
+      } else if (header.messageType.secondaryType ==
+          MessageRouterMessageTypes.updateRequest.index) {
+        handleUpdateRequestMessage(buffer, src, header);
       }
     }
-    return true;
   }
 
-  @override
-  void handleMessage(List<int> buffer, NetworkEntity src) {
-    MessageHeader msg = MessageHeader();
-    msg.build(buffer);
-    if (msg.destination == messageRouterIp && msg.numberOfHops > 0) {
-      // This part only works, because the only messsage that should be sent to the MeR is an update message!!!!!
-      MeRUpdateMessage update = MeRUpdateMessage();
-      update.build(buffer);
-      handleUpdateMessage(update, src);
-      return;
-    }
-    if (msg.destination == broadcastIP) {
-      broadcastMessage(buffer, src);
-      return;
-    }
-    if (!containsRecord(msg.destination)) {
-      return;
-    }
-    // This should not throw, because of the previous statement
-    var element = findRecord(msg.destination);
-    if (element.destinationEntity == src) {
-      broadcastMessage(buffer, src);
-      return;
-    }
-    element.destinationEntity.handleMessage(buffer, src);
+  createListFromAdvertisedRecords(
+      Map<IP, MessageRouterRecord> advertisedRecords) {
+    List out = [];
+    advertisedRecords.forEach(
+      (key, value) {
+        if (value.numberOfHops == 0) {
+          return;
+        }
+        out.add(
+          MessageRouterRecordUpdate(
+              ipOfDevice: key, numberOfHops: value.numberOfHops),
+        );
+      },
+    );
+    return out;
   }
 
-  @override
-  void handle() {
-    int time = DateTime.now().millisecondsSinceEpoch;
-    if (time - lastUpdate >= updateTime) {
-      // sendUpdateMessage(); This is probably not neccessary for the phone part
-      pruneInactiveRecords();
-    }
-  }
-
-  @override
-  void initialize() {
-    advertisedRecords.clear();
-    notAdvertisedRecords.clear();
-    for (NetworkEntity entity in NetworkManager.entities) {
-      addEntity(entity);
-    }
-    sendUpdateMessage();
-  }
-
-  static const IP defautltIP = IP(0);
-  static const IP broadcastIP = IP(255);
-
-  static void addEntity(NetworkEntity entity) {
-    if (entity.advertised()) {
-      advertisedRecords[entity.getIp()] = MessageRouterRecord(
-        ipOfDevice: entity.getIp(),
-        numberOfHops: 0,
-        lastUpdate: DateTime.now().millisecondsSinceEpoch,
-        distance: 0,
-        destinationEntity: entity,
-      );
-    } else {
-      notAdvertisedRecords.add(
-        MessageRouterRecord(
-          ipOfDevice: entity.getIp(),
-          numberOfHops: 0,
-          lastUpdate: DateTime.now().millisecondsSinceEpoch,
-          distance: 0,
-          destinationEntity: entity,
-        ),
-      );
-    }
-  }
+  MessageRouter() : super(ip: messageRouterIp);
 }
