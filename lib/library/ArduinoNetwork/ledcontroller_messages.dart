@@ -3,76 +3,24 @@ import 'package:learning_dart/library/ArduinoNetwork/animation_message.dart';
 import 'package:learning_dart/library/ArduinoNetwork/message.dart';
 import 'package:learning_dart/library/ArduinoNetwork/network_manager.dart';
 
-const int ledControllerMessagePrimaryType = 4;
+const int ledControllerMessagePrimaryType = 5;
 
 enum LedControllerMessageType {
-  setAnimation,
-  getAnimation,
-  getAnimationResponse,
   resize,
   getSize,
   getSizeResponse,
   setBrigthness,
-  getBrigthness,
+  getBrightness,
   getBrightnessResponse,
+  setPopupAnimation,
+  getPopupAnimation,
+  getPopupAnimationResponse,
+  setMainAnimation,
+  getMainAnimation,
+  getMainAnimationResponse,
   setPowerState,
   getPowerState,
   getPowerStateResponse
-}
-
-class LedControllerGetterMessage extends NetworkMessage {
-  LedControllerGetterMessage(
-      {IP destination = const IP(0), int secondaryType = 0})
-      : super(
-          MessageHeader(
-              destination: destination,
-              messageType: MessageType(
-                ledControllerMessagePrimaryType,
-                secondaryType,
-              )),
-          EmptyMessage(),
-        );
-}
-
-class SetAnimationMessage extends NetworkMessage {
-  SetAnimationMessage({
-    Message? animation,
-    IP destination = const IP(0),
-  }) : super(
-          MessageHeader(
-            messageType: MessageType(ledControllerMessagePrimaryType,
-                LedControllerMessageType.setAnimation.index),
-            source: const IP(0),
-            destination: destination,
-          ),
-          animation ?? AnimationBuilderMessage(),
-        );
-
-  Message get animation => second;
-}
-
-class GetAnimationMessage extends LedControllerGetterMessage {
-  GetAnimationMessage({
-    IP destination = const IP(0),
-  }) : super(
-          destination: destination,
-          secondaryType: LedControllerMessageType.getAnimation.index,
-        );
-}
-
-class GetAnimationMessageResponse extends NetworkMessage {
-  GetAnimationMessageResponse({
-    Message? animation,
-    IP destination = const IP(0),
-  }) : super(
-          MessageHeader(
-              destination: destination,
-              messageType: MessageType(ledControllerMessagePrimaryType,
-                  LedControllerMessageType.getAnimationResponse.index)),
-          animation ?? AnimationBuilderMessage(),
-        );
-
-  Message get animation => second;
 }
 
 class ResizeMessage extends NetworkMessage {
@@ -91,12 +39,18 @@ class ResizeMessage extends NetworkMessage {
   int get length => (second as MessageUint16).value;
 }
 
-class GetSizeMessage extends LedControllerGetterMessage {
+class GetSizeMessage extends NetworkMessage {
   GetSizeMessage({
     IP destination = const IP(0),
   }) : super(
-          destination: destination,
-          secondaryType: LedControllerMessageType.getSize.index,
+          MessageHeader(
+            destination: destination,
+            messageType: MessageType(
+              ledControllerMessagePrimaryType,
+              LedControllerMessageType.getSize.index,
+            ),
+          ),
+          EmptyMessage(),
         );
 }
 
@@ -107,7 +61,7 @@ class GetSizeMessageResponse extends NetworkMessage {
             destination: destination,
             messageType: MessageType(
               ledControllerMessagePrimaryType,
-              LedControllerMessageType.getSize.index,
+              LedControllerMessageType.getSizeResponse.index,
             ),
           ),
           MessageUint16(length),
@@ -137,7 +91,7 @@ class GetBrightnessMessage extends NetworkMessage {
             destination: destination,
             messageType: MessageType(
               ledControllerMessagePrimaryType,
-              LedControllerMessageType.getBrigthness.index,
+              LedControllerMessageType.getBrightness.index,
             ),
           ),
           EmptyMessage(),
@@ -161,6 +115,100 @@ class GetBrightnessMessageResponse extends NetworkMessage {
   int get brigthness => (second as MessageUint8).value;
 }
 
+class SetMainAnimationMessage extends NetworkMessage {
+  SetMainAnimationMessage({
+    Message? animation,
+    IP destination = const IP(0),
+  }) : super(
+          MessageHeader(
+            messageType: MessageType(ledControllerMessagePrimaryType,
+                LedControllerMessageType.setMainAnimation.index),
+            source: const IP(0),
+            destination: destination,
+          ),
+          animation ?? AnimationBuilderMessage(),
+        );
+
+  Message get animation => second;
+}
+
+class GetMainAnimationMessage extends NetworkMessage {
+  GetMainAnimationMessage({
+    IP destination = const IP(0),
+  }) : super(
+          MessageHeader(
+            destination: destination,
+            messageType: MessageType(
+              ledControllerMessagePrimaryType,
+              LedControllerMessageType.getMainAnimation.index,
+            ),
+          ),
+          EmptyMessage(),
+        );
+}
+
+class GetMainAnimationResponse extends NetworkMessage {
+  GetMainAnimationResponse({
+    Message? animation,
+    IP destination = const IP(0),
+  }) : super(
+          MessageHeader(
+              destination: destination,
+              messageType: MessageType(ledControllerMessagePrimaryType,
+                  LedControllerMessageType.getMainAnimationResponse.index)),
+          animation ?? AnimationBuilderMessage(),
+        );
+
+  Message get animation => second;
+}
+
+class SetPopupAnimationMessage extends NetworkMessage {
+  SetPopupAnimationMessage({
+    Message? animation,
+    IP destination = const IP(0),
+  }) : super(
+          MessageHeader(
+            messageType: MessageType(ledControllerMessagePrimaryType,
+                LedControllerMessageType.setPopupAnimation.index),
+            source: const IP(0),
+            destination: destination,
+          ),
+          animation ?? AnimationBuilderMessage(),
+        );
+
+  Message get animation => second;
+}
+
+class GetPopupAnimationMessage extends NetworkMessage {
+  GetPopupAnimationMessage({
+    IP destination = const IP(0),
+  }) : super(
+          MessageHeader(
+            destination: destination,
+            messageType: MessageType(
+              ledControllerMessagePrimaryType,
+              LedControllerMessageType.getPopupAnimation.index,
+            ),
+          ),
+          EmptyMessage(),
+        );
+}
+
+class GetPopupAnimationResponse extends NetworkMessage {
+  GetPopupAnimationResponse({
+    Message? animation,
+    IP destination = const IP(0),
+  }) : super(
+          MessageHeader(
+              destination: destination,
+              messageType: MessageType(ledControllerMessagePrimaryType,
+                  LedControllerMessageType.getPopupAnimationResponse.index)),
+          animation ?? AnimationBuilderMessage(),
+        );
+
+  Message get animation => second;
+}
+
 class SetPowerStateMessage extends NetworkMessage {
   SetPowerStateMessage({IP destination = const IP(0), int state = 0})
       : super(
@@ -177,11 +225,17 @@ class SetPowerStateMessage extends NetworkMessage {
   int get state => (second as MessageUint8).value;
 }
 
-class GetPowerStateMessage extends LedControllerGetterMessage {
+class GetPowerStateMessage extends NetworkMessage {
   GetPowerStateMessage({IP destination = const IP(0)})
       : super(
-          destination: destination,
-          secondaryType: LedControllerMessageType.getPowerState.index,
+          MessageHeader(
+            destination: destination,
+            messageType: MessageType(
+              ledControllerMessagePrimaryType,
+              LedControllerMessageType.getPowerState.index,
+            ),
+          ),
+          EmptyMessage(),
         );
 }
 

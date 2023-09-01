@@ -1,3 +1,5 @@
+import 'dart:html';
+
 import 'package:flutter/services.dart';
 
 import 'message.dart';
@@ -32,12 +34,14 @@ class AnimationSwitchMessage extends Message {
 
   @override
   List<int> buildBuffer() {
-    return current.buildBuffer();
+    List<int> out = index.buildBuffer();
+    out.addAll(current.buildBuffer());
+    return out;
   }
 
   @override
   int size() {
-    return current.size();
+    return current.size() + index.size();
   }
 }
 
@@ -52,46 +56,6 @@ class AnimationBuilderMessage extends AnimationSwitchMessage {
         ]);
 }
 
-class EffectSwitch extends AnimationSwitchMessage {
-  EffectSwitch()
-      : super([
-          () => FillEffectMessage(),
-          () => RunningEffectMessage(),
-          () => FillupEffectMessage(),
-          () => HarmonikaEffectMessage(),
-          () => FilloutEffectMessage(),
-          () => PewPewEffectMessage(),
-          () => RgbWaveEffectMessage(),
-          () => RgbCycleEffectMessage(),
-          () => TwoColorWaveEffectMessage(),
-          () => ParticleFillupEffectMessage(),
-          () => BreatheEffectMessage()
-        ]);
-}
-
-class BasicAnimationSwitch extends AnimationSwitchMessage {
-  BasicAnimationSwitch()
-      : super([
-          () => AnimationGroupMessage(),
-          () => DynamicAnimationMessage.empty(),
-          () => SequentialAnimationMessage(),
-          () => ReversedAnimationMessage(),
-          () => AnimationLoopMessage.empty(),
-          () => FadeAnimationMessage(),
-          () => MirroredAnimationMessage()
-        ]);
-}
-
-class AnimationObjectSwitch extends AnimationSwitchMessage {
-  AnimationObjectSwitch()
-      : super([
-          () => FillBasicAnimationMessage.empty(),
-          () => RgbWaveBasicAnimationMessage.empty(),
-          () => TransitionBasicAnimationMessage.empty(),
-          () => ParticleFillupBasicAnimationMessage.empty()
-        ]);
-}
-
 enum AnimationObjectType {
   animationGroup,
   dynamicAnimation,
@@ -101,6 +65,8 @@ enum AnimationObjectType {
   fadeAnimation,
   mirroredAnimation
 }
+
+class AnimationGroupMessage extends SequentialAnimationMessage {}
 
 class DynamicAnimationMessageBody extends SegmentMessage {
   DynamicAnimationMessageBody(
@@ -117,13 +83,12 @@ class DynamicAnimationMessageBody extends SegmentMessage {
   int get index => (segments['index'] as MessageUint16).value;
 }
 
-class DynamicAnimationMessage
-    extends PairMessage<DynamicAnimationMessageBody, Message> {
-  DynamicAnimationMessage.empty()
-      : super(DynamicAnimationMessageBody(), AnimationBuilderMessage());
-  DynamicAnimationMessage(DynamicAnimationMessageBody body, Message animation)
-      : super(body, animation);
+class SequentialAnimationMessage extends ListMessage {
+  SequentialAnimationMessage()
+      : super((int size) => List.filled(size, AnimationBuilderMessage()));
 }
+
+class ReversedAnimationMessage extends AnimationBuilderMessage {}
 
 class AnimationLoopMessage extends PairMessage<MessageUint16, Message> {
   AnimationLoopMessage.empty()
@@ -143,22 +108,20 @@ class FadeAnimationMessageBody extends SegmentMessage {
       (segments['fadeOutDuration'] as MessageUint16).value;
 }
 
-class FadeAnimationMessage
-    extends PairMessage<FadeAnimationMessageBody, AnimationBuilderMessage> {
-  FadeAnimationMessage()
-      : super(FadeAnimationMessageBody(), AnimationBuilderMessage());
-}
-
-class SequentialAnimationMessage extends ListMessage {
-  SequentialAnimationMessage()
-      : super((int size) => List.filled(size, AnimationBuilderMessage()));
-}
-
-class AnimationGroupMessage extends SequentialAnimationMessage {}
-
-class ReversedAnimationMessage extends AnimationBuilderMessage {}
-
 class MirroredAnimationMessage extends AnimationBuilderMessage {}
+
+class AnimationObjectSwitch extends AnimationSwitchMessage {
+  AnimationObjectSwitch()
+      : super([
+          () => AnimationGroupMessage(),
+          () => DynamicAnimationMessage.empty(),
+          () => SequentialAnimationMessage(),
+          () => ReversedAnimationMessage(),
+          () => AnimationLoopMessage.empty(),
+          () => FadeAnimationMessage(),
+          () => MirroredAnimationMessage()
+        ]);
+}
 
 enum EffectType {
   fill,
@@ -172,6 +135,54 @@ enum EffectType {
   twoColorWave,
   particleFillup,
   breathe
+}
+
+class EffectSwitch extends AnimationSwitchMessage {
+  EffectSwitch()
+      : super([
+          () => FillEffectMessage(),
+          () => RunningEffectMessage(),
+          () => FillupEffectMessage(),
+          () => HarmonikaEffectMessage(),
+          () => FilloutEffectMessage(),
+          () => PewPewEffectMessage(),
+          () => RgbWaveEffectMessage(),
+          () => RgbCycleEffectMessage(),
+          () => TwoColorWaveEffectMessage(),
+          () => ParticleFillupEffectMessage(),
+          () => BreatheEffectMessage()
+        ]);
+}
+
+enum BasicAnimationType {
+  basicFill,
+  basicRgbWave,
+  basicTransition,
+  basicParticleFillup
+}
+
+class BasicAnimationSwitch extends AnimationSwitchMessage {
+  BasicAnimationSwitch()
+      : super([
+          () => FillBasicAnimationMessage.empty(),
+          () => RgbWaveBasicAnimationMessage.empty(),
+          () => TransitionBasicAnimationMessage.empty(),
+          () => ParticleFillupBasicAnimationMessage.empty()
+        ]);
+}
+
+class DynamicAnimationMessage
+    extends PairMessage<DynamicAnimationMessageBody, Message> {
+  DynamicAnimationMessage.empty()
+      : super(DynamicAnimationMessageBody(), AnimationBuilderMessage());
+  DynamicAnimationMessage(DynamicAnimationMessageBody body, Message animation)
+      : super(body, animation);
+}
+
+class FadeAnimationMessage
+    extends PairMessage<FadeAnimationMessageBody, AnimationBuilderMessage> {
+  FadeAnimationMessage()
+      : super(FadeAnimationMessageBody(), AnimationBuilderMessage());
 }
 
 class FillEffectMessage extends SegmentMessage {
@@ -294,13 +305,6 @@ class BreatheEffectMessage extends SegmentMessage {
   int get duration => (segments['duration'] as MessageUint32).value;
   Color get color => (segments['color'] as RgbMessageData).color;
   int get fadeTime => (segments['fadeTime'] as MessageUint32).value;
-}
-
-enum BasicAnimationType {
-  basicFill,
-  basicRgbWave,
-  basicTransition,
-  basicParticleFillup
 }
 
 class BasicFillState extends SegmentMessage {
