@@ -6,6 +6,7 @@
 import 'package:flutter_reactive_ble/flutter_reactive_ble.dart';
 import 'package:learning_dart/library/BluetoothHandler/ble_serial.dart';
 import 'package:learning_dart/library/ArduinoNetwork/switch.dart';
+import 'package:learning_dart/library/ArduinoNetwork/network_manager.dart';
 
 class BluetoothHandler {
   static Duration scanDuration = const Duration(seconds: 2);
@@ -22,8 +23,14 @@ class BluetoothHandler {
     )
         .listen(
       (event) async {
-        if (event.failure == null) {
-          bleSwitch = Switch(BleSerial(device.id));
+        if (event.failure == null && bleSwitch == null) {
+          Switch sw = Switch(
+            BleSerial(
+              device.id,
+            ),
+          );
+          bleSwitch = sw;
+          NetworkManager.addSwitch(sw);
         }
       },
     );

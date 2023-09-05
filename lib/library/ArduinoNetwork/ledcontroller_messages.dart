@@ -1,7 +1,5 @@
-import 'package:flutter/material.dart';
 import 'package:learning_dart/library/ArduinoNetwork/animation_message.dart';
 import 'package:learning_dart/library/ArduinoNetwork/message.dart';
-import 'package:learning_dart/library/ArduinoNetwork/network_manager.dart';
 
 const int ledControllerMessagePrimaryType = 5;
 
@@ -18,6 +16,9 @@ enum LedControllerMessageType {
   setMainAnimation,
   getMainAnimation,
   getMainAnimationResponse,
+  setBackgroundAnimation,
+  getBackgroundAnimation,
+  getBackgroundAnimationResponse,
   setPowerState,
   getPowerState,
   getPowerStateResponse
@@ -203,6 +204,55 @@ class GetPopupAnimationResponse extends NetworkMessage {
               destination: destination,
               messageType: MessageType(ledControllerMessagePrimaryType,
                   LedControllerMessageType.getPopupAnimationResponse.index)),
+          animation ?? AnimationBuilderMessage(),
+        );
+
+  Message get animation => second;
+}
+
+class SetBackgroundAnimationMessage extends NetworkMessage {
+  SetBackgroundAnimationMessage({
+    Message? animation,
+    IP destination = const IP(0),
+  }) : super(
+          MessageHeader(
+            messageType: MessageType(ledControllerMessagePrimaryType,
+                LedControllerMessageType.setBackgroundAnimation.index),
+            source: const IP(0),
+            destination: destination,
+          ),
+          animation ?? AnimationBuilderMessage(),
+        );
+
+  Message get animation => second;
+}
+
+class GetBackgroundAnimationMessage extends NetworkMessage {
+  GetBackgroundAnimationMessage({
+    IP destination = const IP(0),
+  }) : super(
+          MessageHeader(
+            destination: destination,
+            messageType: MessageType(
+              ledControllerMessagePrimaryType,
+              LedControllerMessageType.getBackgroundAnimation.index,
+            ),
+          ),
+          EmptyMessage(),
+        );
+}
+
+class GetBackgroundAnimationResponse extends NetworkMessage {
+  GetBackgroundAnimationResponse({
+    Message? animation,
+    IP destination = const IP(0),
+  }) : super(
+          MessageHeader(
+              destination: destination,
+              messageType: MessageType(
+                  ledControllerMessagePrimaryType,
+                  LedControllerMessageType
+                      .getBackgroundAnimationResponse.index)),
           animation ?? AnimationBuilderMessage(),
         );
 
