@@ -1,4 +1,7 @@
+import 'dart:developer';
+
 import 'package:learning_dart/library/ArduinoNetwork/message.dart';
+import 'package:learning_dart/library/ArduinoNetwork/message_router.dart';
 import 'package:learning_dart/library/ArduinoNetwork/network_entity.dart';
 import 'Network_debugger.dart';
 
@@ -55,6 +58,10 @@ class NetworkManager {
     }
     MessageHeader header = MessageHeader();
     header.build(buffer);
+    if (MessageRouter.getNumberOfHops(header.source) < header.numberOfHops) {
+      log("Message is discarded, because it didnt come from the optimal path");
+      return;
+    }
     IP destination = header.destination;
     if (destination == src.getIp() || destination == broadcastIP) {
       routeMessage(buffer, src, header);

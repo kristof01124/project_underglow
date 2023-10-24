@@ -214,4 +214,8 @@ class MessageRouter extends NetworkEntity {
       numberOfHops: header.numberOfHops,
     );
   }
+
+  static int getNumberOfHops(IP ip) {
+    return routingRecords[ip]?.numberOfHops ?? 255;
+  }
 }
