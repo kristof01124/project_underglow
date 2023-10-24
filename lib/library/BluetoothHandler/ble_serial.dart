@@ -1,22 +1,19 @@
 import 'dart:async';
 import 'dart:collection';
-
-import 'package:async/async.dart';
+import 'dart:developer';
 import 'package:flutter_reactive_ble/flutter_reactive_ble.dart';
 import 'package:learning_dart/library/ArduinoNetwork/serial.dart';
 
 const serviceId = "a4c60af7-ef0b-44f5-a456-099136c6777d";
-const writeCharacteristicId = "19f8b7ee-7721-4bcb-94b5-a40e059612e4";
-const readCharacteristicId = "2908b78e-e7c4-4095-84b7-ad63ef4e922f";
+const writeCharacteristicId = "2908b78e-e7c4-4095-84b7-ad63ef4e922f";
+const readCharacteristicId = "19f8b7ee-7721-4bcb-94b5-a40e059612e4";
 const mtu = 100;
 
 Duration waitDuration = const Duration(milliseconds: 500);
 
 class BleSerial extends Serial {
   Iterable<int> writeCharacteristicValue = List.empty();
-  bool connected = false;
   String deviceId;
-  CancelableOperation? operation;
 
   Queue<int> writeBuffer = Queue(), readBuffer = Queue();
 
@@ -33,36 +30,24 @@ class BleSerial extends Serial {
           serviceId: Uuid.parse(serviceId),
           deviceId: deviceId,
         ) {
-    // Create background tasks
     handleReading();
     handleWriting();
   }
 
-  Future<bool> canWrite() async {
-    List<int> val =
-        await FlutterReactiveBle().readCharacteristic(_writeCharacteristic);
-    return val.isEmpty;
-  }
-
   void handleReading() async {
     while (true) {
+      await Future.delayed(const Duration());
       readBuffer.addAll(
-        await FlutterReactiveBle().readCharacteristic(_readCharacteristic),
+        await FlutterReactiveBle()
+            .readCharacteristic(_readCharacteristic)
+            .timeout(const Duration(seconds: 1), onTimeout:() => <int>[],),
       );
-      await Future.delayed(waitDuration);
     }
   }
 
   void handleWriting() async {
     while (true) {
-      // writing periodically
-      if (writeBuffer.isEmpty) {
-        await Future.delayed(waitDuration);
-        continue;
-      }
-      if (!await canWrite()) {
-        continue;
-      }
+      await Future.delayed(const Duration());
       List<int> out = List.from(writeBuffer.take(mtu));
       await FlutterReactiveBle()
           .writeCharacteristicWithResponse(_writeCharacteristic, value: out);

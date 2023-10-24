@@ -1,7 +1,3 @@
-import 'dart:ffi';
-import 'dart:ui';
-
-import 'package:flutter/material.dart';
 import 'package:learning_dart/library/ArduinoNetwork/network_clock.dart';
 
 import '../ArduinoNetwork/message.dart';
@@ -23,44 +19,21 @@ class GVSUpdateRecord extends SegmentMessage {
 typedef GVSUpdateMessage = NetworkMessage<ListMessage>;
 typedef GVSUpdateRequest = NetworkMessage<EmptyMessage>;
 
-enum GlobalValueStoreMessageTypes { updateRequest, updateMessage }
+enum GlobalValueStoreMessageTypes { updateMessage, updateRequest }
 
 class GVSValue {
   double value;
-  int lastUpdate;
-  bool updated;
+  int lastUpdateTime;
+  bool changed;
 
-  GVSValue({this.value = 0, this.lastUpdate = 0, this.updated = false});
+  GVSValue({this.value = 0, this.lastUpdateTime = 0, this.changed = false});
 }
 
 class GlobalValueStore extends NetworkEntity {
-  static const messagePrimaryType = 2;
-  static const numberOfFloats32 = 1024;
-  static const globalValueStoreIp = IP(4);
-
-  static int updateTime = 0;
-  static int lastUpdate = 0;
-
-  static List<GVSValue> values = List.filled(numberOfFloats32, GVSValue());
-
-  static Set<int> changedIds = {};
-
-  List<GVSUpdateRecord> getChangedValues(Set<int> changedIds) {
-    List<GVSUpdateRecord> out = [];
-    for (int index in changedIds) {
-      out.add(
-        GVSUpdateRecord(
-          index: index,
-          value: values.elementAt(index).value,
-          lastUpdateTime: values.elementAt(index).lastUpdate,
-        ),
-      );
-    }
-    return out;
-  }
+  static const messagePrimaryType = 1;
 
   static GVSUpdateMessage createGVSUpdateMessage(
-      {IP source = const IP(0), List<GVSUpdateRecord> changed = const []}) {
+      {IP source = const IP(0, 0), List<GVSUpdateRecord> changed = const []}) {
     return GVSUpdateMessage(
       MessageHeader(
         source: source,
@@ -76,7 +49,7 @@ class GlobalValueStore extends NetworkEntity {
   }
 
   static GVSUpdateRequest createGVSUpdateRequestMessage(
-      {IP source = const IP(0)}) {
+      {IP source = const IP(0, 0)}) {
     return GVSUpdateRequest(
       MessageHeader(
         source: source,
@@ -88,50 +61,97 @@ class GlobalValueStore extends NetworkEntity {
     );
   }
 
-  void handleUpdate(List<int> buffer, NetworkEntity src, MessageHeader header) {
+  void handleGVSUpdateMessage(
+      List<int> buffer, NetworkEntity src, MessageHeader header) {
     GVSUpdateMessage update = createGVSUpdateMessage();
     update.build(buffer);
 
     for (Message message in update.second.data) {
       GVSUpdateRecord record = message as GVSUpdateRecord;
-      set(
-          index: record.index,
-          value: record.value,
-          updateTime: record.lastUpdateTime,
-          local: false);
+      setValue(
+        index: record.index,
+        value: record.value,
+        updateTime: record.lastUpdateTime,
+      );
     }
   }
 
   void handleUpdateRequest(
       List<int> buffer, NetworkEntity src, MessageHeader header) {
-    Set<int> changed = {};
-    for (int i = 0; i < numberOfFloats32; i++) {
-      if (values[i].updated) {
-        changed.add(i);
-      }
-    }
-    if (changed.isNotEmpty) {
-      NetworkManager.handleMessage(
-        createGVSUpdateMessage(
-                source: GlobalValueStore.globalValueStoreIp,
-                changed: getChangedValues(changed))
-            .buildBuffer(),
-        this,
-      );
-    }
+    NetworkManager.handleMessage(
+      createGVSUpdateMessage(source: getIp(), changed: getAllChangedValues())
+          .buildBuffer(),
+      this,
+    );
   }
 
   void handleSyncNotification(
       List<int> buffer, NetworkEntity src, MessageHeader header) {
     for (int i = 0; i < numberOfFloats32; i++) {
-      if (values[i].updated) {
-        values[i].lastUpdate += NetworkClock.timeDifference;
+      if (values[i].changed) {
+        values[i].lastUpdateTime =
+            NetworkClock.convertLocalToServer(values[i].lastUpdateTime);
       }
     }
     NetworkManager.handleMessage(
-      createGVSUpdateRequestMessage(source: globalValueStoreIp).buildBuffer(),
+      createGVSUpdateRequestMessage(source: getIp()).buildBuffer(),
       this,
     );
+    handleUpdateRequest(buffer, src, header);
+  }
+
+  static const numberOfFloats32 = 1024;
+
+  static int updateTime = 0;
+  static int lastUpdate = 0;
+
+  static List<GVSValue> values = List.filled(numberOfFloats32, GVSValue());
+
+  static Set<int> changedIds = {};
+
+  List<GVSUpdateRecord> getChangedValues(Set<int> changedIds) {
+    List<GVSUpdateRecord> out = [];
+    for (int index in changedIds) {
+      out.add(
+        GVSUpdateRecord(
+          index: index,
+          value: values.elementAt(index).value,
+          lastUpdateTime: values.elementAt(index).lastUpdateTime,
+        ),
+      );
+    }
+    return out;
+  }
+
+  List<GVSUpdateRecord> getAllChangedValues() {
+    Set<int> changed = {};
+    for (int i = 0; i < numberOfFloats32; i++) {
+      if (values[i].changed) {
+        changed.add(i);
+      }
+    }
+    return getChangedValues(changed);
+  }
+
+  GlobalValueStore(int updateTime) {
+    GlobalValueStore.updateTime = updateTime;
+  }
+
+  static void setValue(
+      {required int index, required double value, required int updateTime}) {
+    if (updateTime < values[index].lastUpdateTime && values[index].changed) {
+      return;
+    }
+    changedIds.add(index);
+    values[index] = GVSValue(
+      value: value,
+      lastUpdateTime: updateTime,
+      changed: true,
+    );
+  }
+
+  static double getValue(int index) {
+    return values[index].value;
   }
 
   @override
@@ -141,6 +161,7 @@ class GlobalValueStore extends NetworkEntity {
     }
     if (DateTime.now().millisecondsSinceEpoch - lastUpdate > updateTime) {
       sendUpdate();
+      lastUpdate = DateTime.now().millisecondsSinceEpoch;
     }
   }
 
@@ -151,7 +172,7 @@ class GlobalValueStore extends NetworkEntity {
     if (header.messageType ==
         MessageType(messagePrimaryType,
             GlobalValueStoreMessageTypes.updateMessage.index)) {
-      handleUpdate(buffer, src, header);
+      handleGVSUpdateMessage(buffer, src, header);
     } else if (header.messageType ==
         MessageType(messagePrimaryType,
             GlobalValueStoreMessageTypes.updateRequest.index)) {
@@ -164,37 +185,24 @@ class GlobalValueStore extends NetworkEntity {
   }
 
   void sendUpdate() {
-    lastUpdate = DateTime.now().millisecondsSinceEpoch;
     if (changedIds.isEmpty) {
       return;
     }
     NetworkManager.handleMessage(
         createGVSUpdateMessage(
-                source: globalValueStoreIp,
-                changed: getChangedValues(changedIds))
+                source: getIp(), changed: getChangedValues(changedIds))
             .buildBuffer(),
         this);
     changedIds.clear();
   }
 
-  static void set(
-      {required int index,
-      required double value,
-      required int updateTime,
-      bool local = true}) {
-    if (!local && updateTime <= values[index].lastUpdate) {
-      return;
-    }
-    if (value == values.elementAt(index).value) {
-      return;
-    }
-    values[0] = GVSValue(value: value, updated: true, lastUpdate: updateTime);
-    changedIds.add(index);
+  @override
+  IP getIp() {
+    return const IP(0, 1);
   }
 
-  static void setLocally({required int index, required double value}) {
-    set(index: index, value: value, updateTime: NetworkClock.millis());
+  @override
+  void initialize() {
+    values = List.filled(numberOfFloats32, GVSValue());
   }
-
-  GlobalValueStore() : super(ip: globalValueStoreIp);
 }

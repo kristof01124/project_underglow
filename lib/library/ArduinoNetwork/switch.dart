@@ -1,8 +1,8 @@
 import 'dart:collection';
-
 import 'package:learning_dart/library/ArduinoNetwork/network_entity.dart';
 import 'package:learning_dart/library/ArduinoNetwork/network_manager.dart';
 import 'package:learning_dart/library/ArduinoNetwork/serial.dart';
+import 'package:learning_dart/main.dart';
 
 import 'message.dart';
 
@@ -19,28 +19,31 @@ class Switch extends NetworkEntity {
   int timeoutTime = 100;
 
   bool currentlyWriting = false;
-
-  Queue<List<int>> messages = Queue();
   List<int> currentBuffer = [];
 
   ReadingState readingState = ReadingState.start;
 
   Serial serial;
 
-  // WRITING
+  bool cancelNextCharacter = false;
+
+  bool disabled = false;
+
+  int startValues = 0, endValues = 0;
+
+  int lastCharacterReadTime = 0;
+
+  Queue<List<int>> messages = Queue();
 
   bool shouldBeCancelled(int value) {
-    return (value >= cancelCharacter && value <= endCharacter);
+    return value >= cancelCharacter && value <= endCharacter;
   }
 
-  void sendMessages() async {
-    if (currentlyWriting) {
-      return;
-    }
+  void sendMessages() {
     currentlyWriting = true;
-    while (available() != 0) {
-      sendOneMessage(messages.removeFirst());
-      await Future.delayed(Duration.zero);
+    while (messages.isNotEmpty) {
+      sendOneMessage(messages.first);
+      messages.removeFirst();
     }
     currentlyWriting = false;
   }
@@ -72,14 +75,6 @@ class Switch extends NetworkEntity {
     }
   }
 
-  // READING
-
-  int startValues = 0, endValues = 0;
-
-  int lastCharacterReadTime = 0;
-
-  bool cancelNextCharacter = true;
-
   void handleCurrentMessage(int value) {
     int time = DateTime.now().millisecondsSinceEpoch;
     if (time - lastCharacterReadTime > timeoutTime) {
@@ -91,33 +86,45 @@ class Switch extends NetworkEntity {
       return;
     }
     if (readingState == ReadingState.start) {
-      if (value == startCharacter) {
-        startValues++;
-        if (startValues == numberOfDelimiterCharacters) {
-          readingState = ReadingState.messsage;
-        }
-      } else {
-        clear();
-      }
+      handleCurrentMessageStartPhase(value);
     } else if (readingState == ReadingState.messsage) {
-      if (value == endCharacter) {
-        readingState = ReadingState.end;
-        endValues++;
-        return;
-      } else if (!cancelNextCharacter && shouldBeCancelled(value)) {
-        clear();
-        return;
-      }
-      currentBuffer.add(value);
+      handleCurrentMessageMessagePhase(value);
     } else if (readingState == ReadingState.end) {
-      if (value == endCharacter) {
-        endValues++;
-        if (endValues == numberOfDelimiterCharacters) {
-          finalizeCurrentMessage();
-        }
-      } else {
-        clear();
+      handleCurrentMessageEndPhase(value);
+    }
+  }
+
+  void handleCurrentMessageStartPhase(int value) {
+    if (value == startCharacter) {
+      startValues++;
+      if (startValues == numberOfDelimiterCharacters) {
+        readingState = ReadingState.messsage;
       }
+    } else {
+      clear();
+    }
+  }
+
+  void handleCurrentMessageMessagePhase(int value) {
+    if (value == endCharacter) {
+      readingState = ReadingState.end;
+      endValues = 1;
+    } else if (!cancelNextCharacter && shouldBeCancelled(value)) {
+      clear();
+    } else {
+      currentBuffer.add(value);
+      cancelNextCharacter = false;
+    }
+  }
+
+  void handleCurrentMessageEndPhase(int value) {
+    if (value == endCharacter) {
+      endValues++;
+      if (endValues == numberOfDelimiterCharacters) {
+        finalizeCurrentMessage();
+      }
+    } else {
+      clear();
     }
   }
 
@@ -129,28 +136,31 @@ class Switch extends NetworkEntity {
     endValues = 0;
   }
 
-  bool reading() {
-    return true; // Not used nor is important
+  void setDisabled(bool value) {
+    disabled = value;
   }
 
   bool writing() {
     return currentlyWriting;
   }
 
-  bool disabled = false;
+  Switch(this.serial) {
+    clear();
+  }
 
   int available() {
     return messages.length;
   }
 
-  Switch(this.serial) {
-    clear();
-  }
-
   @override
   void handleMessage(List<int> buffer, NetworkEntity src) {
-    messages.add(buffer);
-    sendMessages();
+    if (disabled) {
+      return;
+    }
+    messages.addFirst(buffer);
+    if (!writing()) {
+      sendMessages();
+    }
   }
 
   @override
@@ -174,5 +184,10 @@ class Switch extends NetworkEntity {
       NetworkManager.handleMessage(currentBuffer, this);
     }
     clear();
+  }
+
+  @override
+  IP getIp() {
+    return NetworkManager.switchIP;
   }
 }

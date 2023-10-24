@@ -20,6 +20,8 @@ class SamplePage extends StatelessWidget {
 
   final _scrollController = ScrollController();
 
+  SamplePage({super.key});
+
   double get _horizontalTitlePadding {
     const kCollapsedPadding = 500.0;
 

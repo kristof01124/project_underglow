@@ -27,7 +27,7 @@ enum LedControllerMessageType {
 class ResizeMessage extends NetworkMessage {
   ResizeMessage({
     int length = 0,
-    IP destination = const IP(0),
+    IP destination = const IP(0, 0),
   }) : super(
           MessageHeader(
             destination: destination,
@@ -42,7 +42,7 @@ class ResizeMessage extends NetworkMessage {
 
 class GetSizeMessage extends NetworkMessage {
   GetSizeMessage({
-    IP destination = const IP(0),
+    IP destination = const IP(0, 0),
   }) : super(
           MessageHeader(
             destination: destination,
@@ -56,7 +56,7 @@ class GetSizeMessage extends NetworkMessage {
 }
 
 class GetSizeMessageResponse extends NetworkMessage {
-  GetSizeMessageResponse({IP destination = const IP(0), int length = 0})
+  GetSizeMessageResponse({IP destination = const IP(0, 0), int length = 0})
       : super(
           MessageHeader(
             destination: destination,
@@ -72,7 +72,7 @@ class GetSizeMessageResponse extends NetworkMessage {
 }
 
 class SetBrigthnessMessage extends NetworkMessage {
-  SetBrigthnessMessage({IP destination = const IP(0), int brightness = 0})
+  SetBrigthnessMessage({IP destination = const IP(0, 0), int brightness = 0})
       : super(
           MessageHeader(
             destination: destination,
@@ -86,7 +86,7 @@ class SetBrigthnessMessage extends NetworkMessage {
 }
 
 class GetBrightnessMessage extends NetworkMessage {
-  GetBrightnessMessage({IP destination = const IP(0)})
+  GetBrightnessMessage({IP destination = const IP(0, 0)})
       : super(
           MessageHeader(
             destination: destination,
@@ -101,7 +101,7 @@ class GetBrightnessMessage extends NetworkMessage {
 
 class GetBrightnessMessageResponse extends NetworkMessage {
   GetBrightnessMessageResponse(
-      {IP destination = const IP(0), int brightness = 0})
+      {IP destination = const IP(0, 0), int brightness = 0})
       : super(
           MessageHeader(
             destination: destination,
@@ -119,12 +119,12 @@ class GetBrightnessMessageResponse extends NetworkMessage {
 class SetMainAnimationMessage extends NetworkMessage {
   SetMainAnimationMessage({
     Message? animation,
-    IP destination = const IP(0),
+    IP destination = const IP(0, 0),
   }) : super(
           MessageHeader(
             messageType: MessageType(ledControllerMessagePrimaryType,
                 LedControllerMessageType.setMainAnimation.index),
-            source: const IP(0),
+            source: const IP(0, 0),
             destination: destination,
           ),
           animation ?? AnimationBuilderMessage(),
@@ -135,7 +135,7 @@ class SetMainAnimationMessage extends NetworkMessage {
 
 class GetMainAnimationMessage extends NetworkMessage {
   GetMainAnimationMessage({
-    IP destination = const IP(0),
+    IP destination = const IP(0, 0),
   }) : super(
           MessageHeader(
             destination: destination,
@@ -151,7 +151,7 @@ class GetMainAnimationMessage extends NetworkMessage {
 class GetMainAnimationResponse extends NetworkMessage {
   GetMainAnimationResponse({
     Message? animation,
-    IP destination = const IP(0),
+    IP destination = const IP(0, 0),
   }) : super(
           MessageHeader(
               destination: destination,
@@ -166,12 +166,12 @@ class GetMainAnimationResponse extends NetworkMessage {
 class SetPopupAnimationMessage extends NetworkMessage {
   SetPopupAnimationMessage({
     Message? animation,
-    IP destination = const IP(0),
+    IP destination = const IP(0, 0),
   }) : super(
           MessageHeader(
             messageType: MessageType(ledControllerMessagePrimaryType,
                 LedControllerMessageType.setPopupAnimation.index),
-            source: const IP(0),
+            source: const IP(0, 0),
             destination: destination,
           ),
           animation ?? AnimationBuilderMessage(),
@@ -182,7 +182,7 @@ class SetPopupAnimationMessage extends NetworkMessage {
 
 class GetPopupAnimationMessage extends NetworkMessage {
   GetPopupAnimationMessage({
-    IP destination = const IP(0),
+    IP destination = const IP(0, 0),
   }) : super(
           MessageHeader(
             destination: destination,
@@ -198,7 +198,7 @@ class GetPopupAnimationMessage extends NetworkMessage {
 class GetPopupAnimationResponse extends NetworkMessage {
   GetPopupAnimationResponse({
     Message? animation,
-    IP destination = const IP(0),
+    IP destination = const IP(0, 0),
   }) : super(
           MessageHeader(
               destination: destination,
@@ -213,12 +213,12 @@ class GetPopupAnimationResponse extends NetworkMessage {
 class SetBackgroundAnimationMessage extends NetworkMessage {
   SetBackgroundAnimationMessage({
     Message? animation,
-    IP destination = const IP(0),
+    IP destination = const IP(0, 0),
   }) : super(
           MessageHeader(
             messageType: MessageType(ledControllerMessagePrimaryType,
                 LedControllerMessageType.setBackgroundAnimation.index),
-            source: const IP(0),
+            source: const IP(0, 0),
             destination: destination,
           ),
           animation ?? AnimationBuilderMessage(),
@@ -229,7 +229,7 @@ class SetBackgroundAnimationMessage extends NetworkMessage {
 
 class GetBackgroundAnimationMessage extends NetworkMessage {
   GetBackgroundAnimationMessage({
-    IP destination = const IP(0),
+    IP destination = const IP(0, 0),
   }) : super(
           MessageHeader(
             destination: destination,
@@ -245,7 +245,7 @@ class GetBackgroundAnimationMessage extends NetworkMessage {
 class GetBackgroundAnimationResponse extends NetworkMessage {
   GetBackgroundAnimationResponse({
     Message? animation,
-    IP destination = const IP(0),
+    IP destination = const IP(0, 0),
   }) : super(
           MessageHeader(
               destination: destination,
@@ -260,7 +260,7 @@ class GetBackgroundAnimationResponse extends NetworkMessage {
 }
 
 class SetPowerStateMessage extends NetworkMessage {
-  SetPowerStateMessage({IP destination = const IP(0), int state = 0})
+  SetPowerStateMessage({IP destination = const IP(0, 0), int state = 0})
       : super(
           MessageHeader(
             destination: destination,
@@ -276,7 +276,7 @@ class SetPowerStateMessage extends NetworkMessage {
 }
 
 class GetPowerStateMessage extends NetworkMessage {
-  GetPowerStateMessage({IP destination = const IP(0)})
+  GetPowerStateMessage({IP destination = const IP(0, 0)})
       : super(
           MessageHeader(
             destination: destination,
@@ -290,7 +290,7 @@ class GetPowerStateMessage extends NetworkMessage {
 }
 
 class GetPowerStateMessageResponse extends NetworkMessage {
-  GetPowerStateMessageResponse({IP destination = const IP(0), int state = 0})
+  GetPowerStateMessageResponse({IP destination = const IP(0, 0), int state = 0})
       : super(
           MessageHeader(
               destination: destination,

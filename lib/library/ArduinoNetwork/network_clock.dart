@@ -1,12 +1,11 @@
 // ignore_for_file: prefer_initializing_formals
 
+import 'dart:developer';
+
 import 'package:learning_dart/library/ArduinoNetwork/message.dart';
-import 'package:learning_dart/library/ArduinoNetwork/message_router.dart';
 import 'package:learning_dart/library/ArduinoNetwork/network_manager.dart';
 
 import 'network_entity.dart';
-
-enum NetworkClockMessageTypes { syncRequest, syncResponse, syncNotification }
 
 class SyncResponeBody extends SegmentMessage {
   SyncResponeBody(int sourceTime, int timeDifference, int repeats) {
@@ -20,16 +19,17 @@ class SyncResponeBody extends SegmentMessage {
   get repeats => (segments['repeats'] as MessageUint8).value;
 }
 
+enum NetworkClockMessageTypes { syncRequest, syncResponse, syncNotification }
+
 typedef NetworkClockSyncRequest = NetworkMessage<MessageUint64>;
 typedef NetworkClockSynceResponse = NetworkMessage<SyncResponeBody>;
 typedef NetworkClockSyncNotification = NetworkMessage<EmptyMessage>;
 
 class NetworkClock extends NetworkEntity {
-  static const int messagePrimaryType = 0;
-  static const IP networkClockIp = IP(3);
+  static const int messagePrimaryType = 2;
 
   static NetworkClockSyncRequest createSyncRequest(
-      {IP source = const IP(0), int time = 0}) {
+      {IP source = const IP(0, 0), int time = 0}) {
     return NetworkClockSyncRequest(
       MessageHeader(
         source: source,
@@ -43,10 +43,10 @@ class NetworkClock extends NetworkEntity {
     );
   }
 
-  static NetworkClockSynceResponse createSyncResponse(
-      {IP source = const IP(0),
-      int time = 0,
+  static NetworkClockSynceResponse createSyncResponseMessage(
+      {IP source = const IP(0, 0),
       int timeDifference = 0,
+      int requestTime = 0,
       int repeats = 0}) {
     return NetworkClockSynceResponse(
       MessageHeader(
@@ -58,7 +58,7 @@ class NetworkClock extends NetworkEntity {
         ),
       ),
       SyncResponeBody(
-        time,
+        requestTime,
         timeDifference,
         repeats,
       ),
@@ -66,12 +66,11 @@ class NetworkClock extends NetworkEntity {
   }
 
   static NetworkClockSyncNotification createSyncNotification(
-      {IP source = const IP(0)}) {
+      {IP source = const IP(0, 0)}) {
     return NetworkClockSyncNotification(
       MessageHeader(
         source: source,
-        destination: MessageRouter
-            .localBroadcastIP,
+        destination: NetworkManager.localBroadcastIP,
         messageType: MessageType(
           messagePrimaryType,
           NetworkClockMessageTypes.syncNotification.index,
@@ -79,6 +78,55 @@ class NetworkClock extends NetworkEntity {
       ),
       EmptyMessage(),
     );
+  }
+
+  static int lastUpdate = 0;
+  static int syncRequestDelay = 0;
+
+  static int timeDifference = 0;
+  static bool synced = false;
+  static bool timeServer = false;
+  static int numberOfRepeats = 0;
+
+  @override
+  void handleMessage(List<int> buffer, NetworkEntity src) {
+    MessageHeader header = MessageHeader();
+    header.build(buffer);
+    if (header.messageType ==
+        MessageType(
+          messagePrimaryType,
+          NetworkClockMessageTypes.syncRequest.index,
+        )) {
+      handleSyncRequest(buffer, src, header);
+    } else if (header.messageType ==
+        MessageType(
+          messagePrimaryType,
+          NetworkClockMessageTypes.syncResponse.index,
+        )) {
+      handleSyncResponse(buffer, src, header);
+    }
+  }
+
+  @override
+  void handle() {
+    if (!synced) {
+      if (lastUpdate == 0 ||
+          DateTime.now().millisecondsSinceEpoch - lastUpdate >
+              syncRequestDelay) {
+        NetworkManager.handleMessage(
+            createSyncRequest(
+              source: getIp(),
+              time: DateTime.now().millisecondsSinceEpoch,
+            ).buildBuffer(),
+            this);
+        lastUpdate = DateTime.now().millisecondsSinceEpoch;
+      }
+    }
+  }
+
+  @override
+  IP getIp() {
+    return const IP(0, 2);
   }
 
   void handleSyncRequest(
@@ -90,95 +138,62 @@ class NetworkClock extends NetworkEntity {
     request.build(buffer);
     int sentTime = request.second.value;
     src.handleMessage(
-        createSyncResponse(
-                source: networkClockIp,
-                timeDifference: millis() - sentTime,
-                time: sentTime)
-            .buildBuffer(),
+        createSyncResponseMessage(
+          source: getIp(),
+          timeDifference: DateTime.now().millisecondsSinceEpoch - sentTime,
+          requestTime: sentTime,
+          repeats: 2,
+        ).buildBuffer(),
         this);
   }
 
   void handleSyncResponse(
       List<int> buffer, NetworkEntity src, MessageHeader header) {
-    NetworkClockSynceResponse response = createSyncResponse();
+    NetworkClockSynceResponse response = createSyncResponseMessage();
     response.build(buffer);
-    if (response.second.repeats % 2 == 0 ||
-        response.second.repeats < syncRepeats) {
+    if ((response.second.repeats % 2 == 1 ||
+            response.second.repeats < numberOfRepeats) &&
+        !synced) {
       src.handleMessage(
-          createSyncResponse(
-            source: networkClockIp,
-            time: response.second.sourceTime,
+          createSyncResponseMessage(
+            source: getIp(),
+            requestTime: response.second.sourceTime,
             timeDifference: response.second.timeDifference,
-            repeats: response.second.repeats,
+            repeats: response.second.repeats + 1,
           ).buildBuffer(),
           this);
       return;
     }
+    if (synced) {
+      return;
+    }
     double ping =
         (DateTime.now().millisecondsSinceEpoch - response.second.sourceTime) /
-            (response.second.repeats + 1);
-    timeDifference = response.second.timeDifference - ping;
+            response.second.repeats;
+    timeDifference = response.second.timeDifference - ping.round();
+    if (!synced) {
+      NetworkManager.handleMessage(
+          createSyncNotification(
+            source: getIp(),
+          ).buildBuffer(),
+          this);
+    }
     synced = true;
   }
 
-  void handleSyncNotification(
-      List<int> buffer, NetworkEntity src, MessageHeader header) {}
-
-  static int lastUpdate = 0;
-  static int delay = 0;
-
-  static int timeDifference = 0;
-  static bool synced = false;
-  static bool timeServer = false;
-  static int syncRepeats = 0;
+  NetworkClock(
+      {required timeServer, required int delay, required int numberOfRepeats}) {
+    NetworkClock.timeServer = timeServer;
+    NetworkClock.syncRequestDelay = delay;
+    NetworkClock.numberOfRepeats = numberOfRepeats;
+  }
 
   static bool isTimeServer() {
     return timeServer;
   }
 
-  @override
-  void handle() {
-    if (!synced) {
-      if (lastUpdate == 0 ||
-          DateTime.now().millisecondsSinceEpoch - lastUpdate > delay) {
-        NetworkManager.handleMessage(
-            createSyncRequest(
-                    source: networkClockIp,
-                    time: DateTime.now().millisecondsSinceEpoch)
-                .buildBuffer(),
-            this);
-        lastUpdate = DateTime.now().millisecondsSinceEpoch;
-      }
-    }
-  }
+  static int millis() =>
+      synced ? DateTime.now().millisecondsSinceEpoch + timeDifference : 0;
 
-  @override
-  void handleMessage(List<int> buffer, NetworkEntity src) {
-    MessageHeader header = MessageHeader();
-    header.build(buffer);
-    if (header.messageType.mainType != messagePrimaryType) {
-      return;
-    }
-    int messageSecondaryType = header.messageType.secondaryType;
-    if (messageSecondaryType == NetworkClockMessageTypes.syncRequest.index) {
-      handleSyncRequest(buffer, src, header);
-    } else if (messageSecondaryType ==
-        NetworkClockMessageTypes.syncResponse.index) {
-      handleSyncResponse(buffer, src, header);
-    }
-  }
-
-  NetworkClock({bool timeServer = false, int delay = 0, int syncRepeats = 0})
-      : super(ip: networkClockIp) {
-    NetworkClock.timeServer = timeServer;
-    NetworkClock.delay = delay;
-    NetworkClock.syncRepeats = syncRepeats;
-  }
-
-  static int millis() {
-    if (synced) {
-      return DateTime.now().millisecondsSinceEpoch + timeDifference;
-    }
-    return 0;
-  }
+  static int convertLocalToServer(int time) => time - timeDifference;
 }

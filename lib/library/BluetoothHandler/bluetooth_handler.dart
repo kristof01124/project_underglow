@@ -1,49 +1,65 @@
-/*
-  This class is gonna be responsible for finding possible ble serials, creating and storing them, 
-  and closing them if the connection is broken.
-*/
+import 'dart:developer';
 
 import 'package:flutter_reactive_ble/flutter_reactive_ble.dart';
+import 'package:learning_dart/library/ArduinoNetwork/message.dart';
+import 'package:learning_dart/library/ArduinoNetwork/network_entity.dart';
 import 'package:learning_dart/library/BluetoothHandler/ble_serial.dart';
 import 'package:learning_dart/library/ArduinoNetwork/switch.dart';
 import 'package:learning_dart/library/ArduinoNetwork/network_manager.dart';
+import 'package:permission_handler/permission_handler.dart';
 
-class BluetoothHandler {
-  static Duration scanDuration = const Duration(seconds: 2);
+class BluetoothHandler extends NetworkEntity {
+  Duration scanDuration;
 
-  static final availableDevices = {};
+  final availableDevices = {};
 
-  static Switch? bleSwitch;
+  List<Switch> bleSwitches = [];
 
-  static connect(DiscoveredDevice device) {
+  connect(DiscoveredDevice device) {
     FlutterReactiveBle()
         .connectToDevice(
       id: device.id,
-      connectionTimeout: const Duration(seconds: 1),
     )
         .listen(
-      (event) async {
-        if (event.failure == null && bleSwitch == null) {
+      (ConnectionStateUpdate event) async {
+        if (event.connectionState == DeviceConnectionState.connected) {
+          if (availableDevices.containsKey(device.id)) {
+            return;
+          }
+          availableDevices[device.id] = device;
+          await FlutterReactiveBle().discoverServices(event.deviceId);
           Switch sw = Switch(
             BleSerial(
               device.id,
             ),
           );
-          bleSwitch = sw;
-          NetworkManager.addSwitch(sw);
+          bleSwitches.add(sw);
+          NetworkManager.addEntity(sw);
         }
       },
     );
   }
 
-  static void initialize() {
+  BluetoothHandler(this.scanDuration);
+
+  @override
+  void initialize() async {
+    await Permission.locationWhenInUse.request();
     FlutterReactiveBle().scanForDevices(
       withServices: [Uuid.parse(serviceId)],
       scanMode: ScanMode.lowLatency,
     ).listen(
       (device) {
-        availableDevices[device.id] = device;
+        connect(device);
       },
     );
   }
+
+  @override
+  IP getIp() {
+    return const IP(0, 5);
+  }
+
+  @override
+  void handleMessage(List<int> buffer, NetworkEntity src) {}
 }
