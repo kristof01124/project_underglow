@@ -109,7 +109,7 @@ class GlobalValueStore extends NetworkEntity {
 
   static Set<int> changedIds = {};
 
-  List<GVSUpdateRecord> getChangedValues(Set<int> changedIds) {
+  static List<GVSUpdateRecord> getChangedValues(Set<int> changedIds) {
     List<GVSUpdateRecord> out = [];
     for (int index in changedIds) {
       out.add(
@@ -123,7 +123,7 @@ class GlobalValueStore extends NetworkEntity {
     return out;
   }
 
-  List<GVSUpdateRecord> getAllChangedValues() {
+  static List<GVSUpdateRecord> getAllChangedValues() {
     Set<int> changed = {};
     for (int i = 0; i < numberOfFloats32; i++) {
       if (values[i].changed) {

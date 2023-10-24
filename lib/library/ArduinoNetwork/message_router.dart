@@ -129,7 +129,7 @@ class MessageRouter extends NetworkEntity {
         .handleMessage(buffer, src);
   }
 
-  Map<IP, RoutingRecord> routingRecords = {};
+  static Map<IP, RoutingRecord> routingRecords = {};
 
   bool isBetter(MessageRouterRecordUpdate newRecord) {
     return (!routingRecords.containsKey(newRecord.ipOfDevice) ||
