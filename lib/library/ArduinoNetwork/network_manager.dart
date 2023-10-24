@@ -56,8 +56,8 @@ class NetworkManager {
     MessageHeader header = MessageHeader();
     header.build(buffer);
     IP destination = header.destination;
-    if (destination == src.getIp()) {
-      outsideBroadcastMessage(buffer, src);
+    if (destination == src.getIp() || destination == broadcastIP) {
+      routeMessage(buffer, src, header);
       return;
     }
     if (advertisedEntities.containsKey(destination)) {
@@ -68,18 +68,25 @@ class NetworkManager {
       backgroundDaemons[destination]?.handleMessage(buffer, src);
       return;
     }
-    if (destination == broadcastIP) {
-      broadcastMessage(buffer, src);
-      return;
-    }
     if (destination == localBroadcastIP) {
       localBroadcastMessage(buffer, src);
       return;
     }
-    routeMessage(buffer, src);
+    routeMessage(buffer, src, header);
   }
 
-  static void routeMessage(List<int> buffer, NetworkEntity src) {
+  static void routeMessage(
+      List<int> buffer, NetworkEntity src, MessageHeader header) {
+    header.setup(header.sizeOfPayload);
+    buffer.setAll(0, header.buildBuffer());
+    if (header.destination == broadcastIP) {
+      broadcastMessage(buffer, src);
+      return;
+    }
+    if (header.destination == src.getIp()) {
+      outsideBroadcastMessage(buffer, src);
+      return;
+    }
     backgroundDaemons[messageRouterIp]?.handleMessage(buffer, src);
   }
 
