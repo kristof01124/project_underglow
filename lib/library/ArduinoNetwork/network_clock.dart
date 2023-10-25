@@ -137,14 +137,15 @@ class NetworkClock extends NetworkEntity {
     NetworkClockSyncRequest request = createSyncRequest();
     request.build(buffer);
     int sentTime = request.second.value;
-    src.handleMessage(
+    NetworkManager.sendMessage(
         createSyncResponseMessage(
           source: getIp(),
           timeDifference: DateTime.now().millisecondsSinceEpoch - sentTime,
           requestTime: sentTime,
           repeats: 2,
         ).buildBuffer(),
-        this);
+        this,
+        src);
   }
 
   void handleSyncResponse(
@@ -154,14 +155,15 @@ class NetworkClock extends NetworkEntity {
     if ((response.second.repeats % 2 == 1 ||
             response.second.repeats < numberOfRepeats) &&
         !synced) {
-      src.handleMessage(
+      NetworkManager.sendMessage(
           createSyncResponseMessage(
             source: getIp(),
             requestTime: response.second.sourceTime,
             timeDifference: response.second.timeDifference,
             repeats: response.second.repeats + 1,
           ).buildBuffer(),
-          this);
+          this,
+          src);
       return;
     }
     if (synced) {

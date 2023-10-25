@@ -204,14 +204,14 @@ class MessageRouter extends NetworkEntity {
   void reinforceRecord(MessageHeader header, NetworkEntity src) {
     if (!isBetter(MessageRouterRecordUpdate(
       ipOfDevice: src.getIp(),
-      numberOfHops: header.numberOfHops,
+      numberOfHops: header.numberOfHops - 1,
     ))) {
       return;
     }
     routingRecords[header.source] = RoutingRecord(
       destinationEntity: src,
       timeOfCreation: DateTime.now().millisecondsSinceEpoch,
-      numberOfHops: header.numberOfHops,
+      numberOfHops: header.numberOfHops - 1,
     );
   }
 

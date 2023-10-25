@@ -82,10 +82,18 @@ class NetworkManager {
     routeMessage(buffer, src, header);
   }
 
+  static List<int> setupMessage(List<int> buffer) {
+    MessageHeader header = MessageHeader();
+    header.build(buffer);
+    header.setup(buffer.length - header.size());
+    buffer.setAll(0, header.buildBuffer());
+    return buffer;
+  }
+
   static void routeMessage(
       List<int> buffer, NetworkEntity src, MessageHeader header) {
-    header.setup(header.sizeOfPayload);
-    buffer.setAll(0, header.buildBuffer());
+    buffer = setupMessage(buffer);
+
     if (header.destination == broadcastIP) {
       broadcastMessage(buffer, src);
       return;
@@ -151,6 +159,11 @@ class NetworkManager {
 
   static void attachDebugger(NetworkDebugger debugger) {
     debuggers.add(debugger);
+  }
+
+  static void sendMessage(
+      List<int> buffer, NetworkEntity src, NetworkEntity dst) {
+    dst.handleMessage(setupMessage(buffer), src);
   }
 
   get getAdvertisedEntities => advertisedEntities;
