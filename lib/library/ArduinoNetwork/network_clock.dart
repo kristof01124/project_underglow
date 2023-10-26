@@ -154,7 +154,7 @@ class NetworkClock extends NetworkEntity {
     response.build(buffer);
     if ((response.second.repeats % 2 == 1 ||
             response.second.repeats < numberOfRepeats) &&
-        !synced) {
+        (!synced || isTimeServer())) {
       NetworkManager.sendMessage(
           createSyncResponseMessage(
             source: getIp(),
@@ -186,6 +186,7 @@ class NetworkClock extends NetworkEntity {
   NetworkClock(
       {required timeServer, required int delay, required int numberOfRepeats}) {
     NetworkClock.timeServer = timeServer;
+    NetworkClock.synced = timeServer;
     NetworkClock.syncRequestDelay = delay;
     NetworkClock.numberOfRepeats = numberOfRepeats;
   }
