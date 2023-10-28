@@ -1,5 +1,5 @@
-import 'package:learning_dart/library/ArduinoNetwork/animation_message.dart';
 import 'package:learning_dart/library/ArduinoNetwork/message.dart';
+import 'package:learning_dart/library/LedController/animation_message.dart';
 
 const int ledControllerMessagePrimaryType = 5;
 

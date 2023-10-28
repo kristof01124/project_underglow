@@ -1,4 +1,6 @@
 import 'dart:collection';
+import 'dart:developer';
+import 'package:learning_dart/library/ArduinoNetwork/advanced_debug_entity.dart';
 import 'package:learning_dart/library/ArduinoNetwork/network_entity.dart';
 import 'package:learning_dart/library/ArduinoNetwork/network_manager.dart';
 import 'package:learning_dart/library/ArduinoNetwork/serial.dart';
@@ -16,7 +18,7 @@ class Switch extends NetworkEntity {
   final int endCharacter = 172;
   final int numberOfDelimiterCharacters = 8;
 
-  int timeoutTime = 100;
+  int timeoutTime = 1000;
 
   bool currentlyWriting = false;
   List<int> currentBuffer = [];
@@ -106,7 +108,7 @@ class Switch extends NetworkEntity {
   }
 
   void handleCurrentMessageMessagePhase(int value) {
-    if (value == endCharacter) {
+    if (!cancelNextCharacter && value == endCharacter) {
       readingState = ReadingState.end;
       endValues = 1;
     } else if (!cancelNextCharacter && shouldBeCancelled(value)) {

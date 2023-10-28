@@ -7,9 +7,9 @@ import 'package:learning_dart/library/ArduinoNetwork/serial.dart';
 const serviceId = "a4c60af7-ef0b-44f5-a456-099136c6777d";
 const writeCharacteristicId = "2908b78e-e7c4-4095-84b7-ad63ef4e922f";
 const readCharacteristicId = "19f8b7ee-7721-4bcb-94b5-a40e059612e4";
-const mtu = 100;
+const mtu = 250;
 
-Duration waitDuration = const Duration(milliseconds: 500);
+Duration waitDuration = const Duration(milliseconds: 1);
 
 class BleSerial extends Serial {
   Iterable<int> writeCharacteristicValue = List.empty();
@@ -40,8 +40,12 @@ class BleSerial extends Serial {
       readBuffer.addAll(
         await FlutterReactiveBle()
             .readCharacteristic(_readCharacteristic)
-            .timeout(const Duration(seconds: 1), onTimeout:() => <int>[],),
+            .timeout(
+              const Duration(seconds: 1),
+              onTimeout: () => <int>[],
+            ),
       );
+      log(readBuffer.toString());
     }
   }
 

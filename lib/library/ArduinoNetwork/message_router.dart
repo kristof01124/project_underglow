@@ -124,6 +124,7 @@ class MessageRouter extends NetworkEntity {
   }
 
   void routeMessage(List<int> buffer, NetworkEntity src, MessageHeader header) {
+    reinforceRecord(header, src);
     routingRecords[header.destination]
         ?.destinationEntity
         .handleMessage(buffer, src);
@@ -157,7 +158,6 @@ class MessageRouter extends NetworkEntity {
   void handleMessage(List<int> buffer, NetworkEntity src) {
     MessageHeader header = MessageHeader();
     header.build(buffer);
-    reinforceRecord(header, src);
     if (header.messageType ==
         MessageType(
           messagePrimaryType,
@@ -202,6 +202,10 @@ class MessageRouter extends NetworkEntity {
   }
 
   void reinforceRecord(MessageHeader header, NetworkEntity src) {
+    if (header.source.value <= NetworkManager.advertisedEntityMinIP.value ||
+        header.source.value > NetworkManager.advertisedEntityMaxIP.value) {
+      return;
+    }
     if (!isBetter(MessageRouterRecordUpdate(
       ipOfDevice: src.getIp(),
       numberOfHops: header.numberOfHops - 1,

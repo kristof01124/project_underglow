@@ -1,6 +1,6 @@
 import 'package:flutter/services.dart';
 
-import 'message.dart';
+import '../ArduinoNetwork/message.dart';
 
 class RgbMessageData extends SegmentMessage {
   RgbMessageData(Color color) {

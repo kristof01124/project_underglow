@@ -2,6 +2,7 @@ import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:learning_dart/library/ArduinoNetwork/Network_debugger.dart';
+import 'package:learning_dart/library/ArduinoNetwork/advanced_debug_entity.dart';
 import 'package:learning_dart/library/ArduinoNetwork/global_value_store.dart';
 import 'package:learning_dart/library/ArduinoNetwork/message.dart';
 import 'package:learning_dart/library/ArduinoNetwork/message_router.dart';
@@ -11,17 +12,13 @@ import 'package:learning_dart/library/BluetoothHandler/bluetooth_handler.dart';
 
 var espMacAddress = "78:21:84:92:49:1E";
 
-void printMessageHeaderData(List<int> buffer) {
-  MessageHeader header = MessageHeader();
-  header.build(buffer);
-  log("Digesting a message!\n"
-      "source: ${header.source.primaryValue}.${header.source.secondaryValue}\n"
-      "Destination: ${header.destination.primaryValue}.${header.destination.secondaryValue}\n"
-      "Message type: ${header.messageType.primaryValue} ${header.messageType.secondaryValue}\n"
-      "Checksum: ${header.checksum}\n"
-      "Number of hops: ${header.numberOfHops}\n"
-      "Size of payload: ${header.sizeOfPayload}"
-      "----------------------------------------------------------------------");
+void foo() async {
+  while (true) {
+    AdvancedDebugEntity.printAllAvailableRoutes();
+    AdvancedDebugEntity.printAllAvailableGVSValues();
+    AdvancedDebugEntity.printSyncedTime();
+    await Future.delayed(const Duration(seconds: 5));
+  }
 }
 
 class MainView extends StatelessWidget {
@@ -29,12 +26,13 @@ class MainView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    foo();
+
     NetworkManager.addEntity(
         NetworkClock(timeServer: false, delay: 5000, numberOfRepeats: 10));
     NetworkManager.addEntity(MessageRouter());
     NetworkManager.addEntity(BluetoothHandler(const Duration(seconds: 2)));
-    NetworkManager.attachDebugger(
-        NetworkDebugger(action: printMessageHeaderData));
+    NetworkManager.addEntity(GlobalValueStore(20));
     NetworkManager.initialize();
     return Container();
   }
