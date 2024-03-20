@@ -5,7 +5,7 @@ import 'package:learning_dart/library/ArduinoNetwork/message.dart';
 import 'package:learning_dart/library/ArduinoNetwork/network_entity.dart';
 import 'package:learning_dart/library/BluetoothHandler/ble_serial.dart';
 import 'package:learning_dart/library/ArduinoNetwork/switch.dart';
-import 'package:learning_dart/library/ArduinoNetwork/network_manager.dart';
+import 'package:learning_dart/library/BluetoothHandler/phone_controller.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 class BluetoothHandler extends NetworkEntity {
@@ -28,13 +28,14 @@ class BluetoothHandler extends NetworkEntity {
           }
           availableDevices[device.id] = device;
           await FlutterReactiveBle().discoverServices(event.deviceId);
-          Switch sw = Switch(
-            BleSerial(
-              device.id,
+          PhoneController.addBoard(
+            device.id,
+            Switch(
+              BleSerial(
+                device.id,
+              ),
             ),
           );
-          bleSwitches.add(sw);
-          NetworkManager.addEntity(sw);
         }
       },
     );

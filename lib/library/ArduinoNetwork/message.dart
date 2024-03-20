@@ -1,9 +1,6 @@
 import 'dart:developer';
 import 'dart:typed_data';
 
-import 'package:learning_dart/library/ArduinoNetwork/network_clock.dart';
-import 'package:learning_dart/library/ArduinoNetwork/network_manager.dart';
-
 class IP {
   final int primaryValue, secondaryValue;
 
@@ -75,72 +72,38 @@ class MessageTypeMessageData extends SegmentMessage {
 
 class MessageHeader extends SegmentMessage {
   MessageHeader({
-    int protocol = NetworkManager.protocol,
     IP source = const IP(0, 0),
     IP destination = const IP(0, 0),
     MessageType messageType = const MessageType(0, 0),
-    int time = 0,
-    int checksum = 0,
+    int id = 0,
     int sizeOfPayload = 0,
+    int checksum = 0,
     int numberOfHops = 0,
+    int fragmentIndex = 0,
+    int numberOfFragments = 0,
   }) {
-    add('protocol', MessageUint8(protocol));
     add('source', IpMessageData(source));
     add('destination', IpMessageData(destination));
     add('messageType', MessageTypeMessageData(messageType));
-    add('time', MessageUint64(time));
-    add('checksum', MessageUint16(checksum));
+    add('id', MessageUint32(id));
     add('sizeOfPayload', MessageUint16(sizeOfPayload));
     add('numberOfHops', MessageUint8(numberOfHops));
+    add('checksum', MessageUint16(checksum));
+    add('fragmentIndex', MessageUint16(fragmentIndex));
+    add('numberOfFragments', MessageUint16(numberOfFragments));
   }
 
-  int get protocol => (segments['protocol'] as MessageUint8).value;
   IP get source => (segments['source'] as IpMessageData).value;
   IP get destination => (segments['destination'] as IpMessageData).value;
   MessageType get messageType =>
       (segments['messageType'] as MessageTypeMessageData).value;
-  int get time => (segments['time'] as MessageUint64).value;
-  int get checksum => (segments['checksum'] as MessageUint16).value;
+  int get id => (segments['id'] as MessageUint32).value;
   int get sizeOfPayload => (segments['sizeOfPayload'] as MessageUint16).value;
   int get numberOfHops => (segments['numberOfHops'] as MessageUint8).value;
-
-  int calculateChecksum() {
-    if (checksum > 0) {
-      return MessageHeader(
-        protocol: protocol,
-        source: source,
-        destination: destination,
-        messageType: messageType,
-        time: time,
-        sizeOfPayload: sizeOfPayload,
-        numberOfHops: numberOfHops,
-      ).calculateChecksum();
-    }
-    int out = 0;
-    for (int element in (buildBuffer().map((e) => (e < 0 ? e + 256 : e)))) {
-      out += element;
-    }
-    return out;
-  }
-
-  bool check(int size) {
-    if (size != sizeOfPayload + this.size()) {
-      log("The size of the payload doesnt match the expectation!(Expected: $sizeOfPayload + ${this.size()}, got $size)");
-      return false;
-    }
-    if (checksum != calculateChecksum()) {
-      log("The checksum isnt correct(got $checksum, expected $calculateChecksum())");
-      return false;
-    }
-    return true;
-  }
-
-  void setup(int sizeOfPayload) {
-    segments['sizeOfPayload'] = MessageUint16(sizeOfPayload);
-    segments['numberOfHops'] = MessageUint8(numberOfHops + 1);
-    segments['time'] = MessageUint64(NetworkClock.millis());
-    segments['checksum'] = MessageUint16(calculateChecksum());
-  }
+  int get checksum => (segments['checksum'] as MessageUint16).value;
+  int get fragmentIndex => (segments['fragmentIndex'] as MessageUint16).value;
+  int get numberOfFragments =>
+      (segments['numberOfFragments'] as MessageUint16).value;
 }
 
 class EmptyMessage extends Message {
@@ -437,14 +400,6 @@ class SegmentMessage extends Message {
       out.addAll(segments[key]?.buildBuffer() ?? []);
     }
     return out;
-  }
-}
-
-class NetworkMessage<T extends Message> extends PairMessage<MessageHeader, T> {
-  NetworkMessage(MessageHeader header, T value) : super(header, value);
-
-  void setup() {
-    first.setup(second.size());
   }
 }
 

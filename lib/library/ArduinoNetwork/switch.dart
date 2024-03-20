@@ -1,10 +1,6 @@
 import 'dart:collection';
-import 'dart:developer';
-import 'package:learning_dart/library/ArduinoNetwork/advanced_debug_entity.dart';
 import 'package:learning_dart/library/ArduinoNetwork/network_entity.dart';
-import 'package:learning_dart/library/ArduinoNetwork/network_manager.dart';
 import 'package:learning_dart/library/ArduinoNetwork/serial.dart';
-import 'package:learning_dart/main.dart';
 
 import 'message.dart';
 
@@ -13,10 +9,10 @@ Duration waitDuration = const Duration(milliseconds: 500);
 enum ReadingState { start, messsage, end }
 
 class Switch extends NetworkEntity {
-  final int cancelCharacter = 170;
-  final int startCharacter = 171;
-  final int endCharacter = 172;
-  final int numberOfDelimiterCharacters = 8;
+  final int cancelCharacter = 172;
+  final int startCharacter = 170;
+  final int endCharacter = 171;
+  final int numberOfDelimiterCharacters = 4;
 
   int timeoutTime = 1000;
 
@@ -38,7 +34,7 @@ class Switch extends NetworkEntity {
   Queue<List<int>> messages = Queue();
 
   bool shouldBeCancelled(int value) {
-    return value >= cancelCharacter && value <= endCharacter;
+    return value >= startCharacter && value <= cancelCharacter;
   }
 
   void sendMessages() {
@@ -182,14 +178,8 @@ class Switch extends NetworkEntity {
   void finalizeCurrentMessage() {
     MessageHeader msg = MessageHeader();
     msg.build(currentBuffer);
-    if (msg.check(currentBuffer.length)) {
-      NetworkManager.handleMessage(currentBuffer, this);
-    }
+    // TODO: Send the messag
+    // Right now there is no use for this, but later might be useful
     clear();
-  }
-
-  @override
-  IP getIp() {
-    return NetworkManager.switchIP;
   }
 }

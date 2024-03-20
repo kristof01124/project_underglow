@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:collection';
 import 'dart:developer';
 import 'package:flutter_reactive_ble/flutter_reactive_ble.dart';
+import 'package:learning_dart/library/ArduinoNetwork/message.dart';
 import 'package:learning_dart/library/ArduinoNetwork/serial.dart';
 
 const serviceId = "a4c60af7-ef0b-44f5-a456-099136c6777d";
@@ -45,7 +46,6 @@ class BleSerial extends Serial {
               onTimeout: () => <int>[],
             ),
       );
-      log(readBuffer.toString());
     }
   }
 
