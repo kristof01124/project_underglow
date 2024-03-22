@@ -155,7 +155,7 @@ class Switch extends NetworkEntity {
     if (disabled) {
       return;
     }
-    messages.addFirst(buffer);
+    messages.add(buffer);
     if (!writing()) {
       sendMessages();
     }

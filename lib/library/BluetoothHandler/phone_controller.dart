@@ -1,9 +1,14 @@
 // This is the class, that creates a bridge between the backend and the frontend
 
+import 'dart:developer';
+import 'dart:ui';
+
 import 'package:learning_dart/library/ArduinoNetwork/message.dart';
 import 'package:learning_dart/library/ArduinoNetwork/serial.dart';
 import 'package:learning_dart/library/ArduinoNetwork/switch.dart';
 import 'package:learning_dart/library/ledcontroller/animation.dart';
+import 'package:learning_dart/library/ledcontroller/effects.dart';
+import 'package:learning_dart/library/ledcontroller/led_controller_messages.dart';
 
 class LedID {
   String macAddress;
@@ -35,7 +40,7 @@ class PhoneController {
 
   static void setAnimation({
     required LedID id,
-    required ArduinAnimation animation,
+    required ArduinoAnimation animation,
     required int layer,
   }) {
     throw UnimplementedError();

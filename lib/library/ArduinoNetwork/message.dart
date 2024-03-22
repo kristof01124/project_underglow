@@ -154,7 +154,7 @@ abstract class MessageGenericType<T> extends Message {
   @override
   List<int> buildBuffer() {
     creatorFunc(0, value);
-    return byteData.buffer.asInt8List().reversed.toList();
+    return byteData.buffer.asUint8List().reversed.toList();
   }
 }
 

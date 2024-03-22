@@ -57,10 +57,5 @@ class BluetoothHandler extends NetworkEntity {
   }
 
   @override
-  IP getIp() {
-    return const IP(0, 5);
-  }
-
-  @override
   void handleMessage(List<int> buffer, NetworkEntity src) {}
 }
