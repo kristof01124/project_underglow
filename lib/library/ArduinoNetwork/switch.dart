@@ -1,6 +1,7 @@
 import 'dart:collection';
 import 'package:learning_dart/library/ArduinoNetwork/network_entity.dart';
 import 'package:learning_dart/library/ArduinoNetwork/serial.dart';
+import 'package:learning_dart/library/BluetoothHandler/phone_controller.dart';
 
 import 'message.dart';
 
@@ -176,10 +177,7 @@ class Switch extends NetworkEntity {
   }
 
   void finalizeCurrentMessage() {
-    MessageHeader msg = MessageHeader();
-    msg.build(currentBuffer);
-    // TODO: Send the messag
-    // Right now there is no use for this, but later might be useful
+    PhoneController.handleMessage(currentBuffer, this);
     clear();
   }
 }

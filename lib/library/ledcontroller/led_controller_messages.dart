@@ -16,10 +16,10 @@ typedef SetAnimationMessage
 typedef AppendAnimationMessage = SetAnimationMessage;
 typedef SyncMessage = PairMessage<MessageHeader, MessageUint64>;
 
-class Ledcontroller {
+class LedController {
   static const int messagePrimaryType = 5;
   static SetBrightnessMessage createSetBrightnessMessage(
-      IP source, IP destination, int brightness) {
+      {required IP source, required IP destination, required int brightness}) {
     return SetBrightnessMessage(
         MessageHeader(
           source: source,
@@ -33,7 +33,7 @@ class Ledcontroller {
   }
 
   static SetPowerMessage createSetPowerMessage(
-      IP source, IP destination, bool state) {
+      {required IP source, required IP destination, required bool state}) {
     return SetBrightnessMessage(
       MessageHeader(
         source: source,
@@ -48,7 +48,10 @@ class Ledcontroller {
   }
 
   static SetAnimationMessage crateSetAnimationMessage(
-      IP source, IP destination, int index, ArduinoAnimation animation) {
+      {required IP source,
+      required IP destination,
+      required int index,
+      required ArduinoAnimation animation}) {
     return SetAnimationMessage(
         MessageHeader(
           source: source,
@@ -65,7 +68,10 @@ class Ledcontroller {
   }
 
   static AppendAnimationMessage createAppendAnimationMessage(
-      IP source, IP destination, int index, ArduinoAnimation animation) {
+      {required IP source,
+      required IP destination,
+      required int index,
+      required ArduinoAnimation animation}) {
     return AppendAnimationMessage(
         MessageHeader(
           source: source,
@@ -81,7 +87,8 @@ class Ledcontroller {
         ));
   }
 
-  static SyncMessage createSyncMessage(IP source, IP destination, int time) {
+  static SyncMessage createSyncMessage(
+      {required IP source, required IP destination, required int time}) {
     return SyncMessage(
       MessageHeader(
         source: source,
